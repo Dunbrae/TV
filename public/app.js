@@ -34,6 +34,21 @@ function formatPercent(value) {
   return `${percentFormatter.format(numberValue)}%`;
 }
 
+function formatWeeklyDate(dateString) {
+  if (!dateString) return '';
+  const parts = dateString.split('-');
+  if (parts.length === 3) {
+    const year = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10) - 1;
+    const day = parseInt(parts[2], 10);
+    const d = new Date(year, month, day);
+    if (!Number.isNaN(d.getTime())) {
+       return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    }
+  }
+  return dateString;
+}
+
 function normalizePercent(value, target, invoiced) {
   if (typeof value === 'number' && Number.isFinite(value) && value > 0) {
     return Math.max(0, Math.min(100, value));
@@ -139,12 +154,31 @@ function clearDashboardValues() {
   }
 }
 
+function resetCarouselProgress() {
+  const bar = document.getElementById('carousel-progress');
+  if (!bar) return;
+  
+  bar.style.transition = 'none';
+  bar.style.width = '0%';
+  
+  if (isCarouselMode) {
+    // Force a browser reflow to apply the 0% immediately
+    void bar.offsetWidth;
+    
+    // Start linear transition for exactly 15s
+    bar.style.transition = 'width 15s linear';
+    bar.style.width = '100%';
+  }
+}
+
 function applyCarouselState() {
   const dashboardCards = carouselCards.length ? carouselCards : [];
 
   if (!dashboardCards.length) {
     return;
   }
+  
+  resetCarouselProgress();
 
   if (isCarouselMode) {
     dashboardCards.forEach((card, index) => {
@@ -281,8 +315,8 @@ function render(data) {
       (row) => `
         <tr class="hover:bg-slate-50/50 transition-colors border-b border-slate-100">
           <td class="py-4.5 px-6 font-bold text-slate-900">${row.week ?? ''}</td>
-          <td class="py-4.5 px-6 text-slate-600 font-medium">${row.start ?? ''}</td>
-          <td class="py-4.5 px-6 text-slate-600 font-medium">${row.end ?? ''}</td>
+          <td class="py-4.5 px-6 text-slate-600 font-medium">${formatWeeklyDate(row.start)}</td>
+          <td class="py-4.5 px-6 text-slate-600 font-medium">${formatWeeklyDate(row.end)}</td>
           <td class="py-4.5 px-6 text-right font-bold text-slate-700">${formatCurrency(row.target)}</td>
           <td class="py-4.5 px-6 text-right font-bold text-indigo-700">${row.invoiced === null ? '' : formatCurrency(row.invoiced)}</td>
           <td class="py-4.5 px-6 text-right font-black text-slate-900">${formatPercent(row.percent)}</td>
