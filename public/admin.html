@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TV Display Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Montserrat', 'sans-serif'],
+            },
+          },
+        },
+      };
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="min-h-screen bg-[linear-gradient(180deg,#1f5fb8_0_26vh,#eef3f9_26vh_100%)] font-sans text-slate-800">
+    <main class="mx-auto w-[min(1280px,calc(100vw-32px))] py-7 pb-10">
+      <section class="px-2 py-3 pb-6 text-white">
+        <p class="mb-2 text-[0.78rem] uppercase tracking-[0.18em] opacity-75">Protected Admin</p>
+        <h1 class="mb-3 text-[clamp(2rem,4vw,4rem)] font-black uppercase leading-[0.96]">Login and edit dashboard values</h1>
+        <p class="max-w-[720px] text-base opacity-90">Changes save into <code>data.json</code> and appear on the TV display after refresh.</p>
+        <p class="mt-3"><a class="inline-block border-b-2 border-white/60 text-sm font-bold text-white no-underline hover:border-white" href="/">Back to dashboard</a></p>
+      </section>
+
+      <section id="login-panel" class="mb-6 rounded-[28px] bg-white p-6 shadow-[0_26px_74px_rgba(18,42,82,0.15)]">
+        <h2 class="mb-4 text-2xl font-extrabold uppercase text-slate-800">Login</h2>
+        <form id="login-form" class="grid gap-4 md:grid-cols-2 md:items-end">
+          <label>
+            <span class="font-bold text-slate-800">Username</span>
+            <input id="username" name="username" type="text" autocomplete="username" required class="w-full rounded-[14px] border border-slate-300 bg-white px-4 py-3 font-sans text-slate-800 outline-none focus:border-[#1f5fb8] focus:ring-2 focus:ring-[#1f5fb8]/20" />
+          </label>
+          <label>
+            <span class="font-bold text-slate-800">Password</span>
+            <input id="password" name="password" type="password" autocomplete="current-password" required class="w-full rounded-[14px] border border-slate-300 bg-white px-4 py-3 font-sans text-slate-800 outline-none focus:border-[#1f5fb8] focus:ring-2 focus:ring-[#1f5fb8]/20" />
+          </label>
+          <button type="submit" class="rounded-[14px] bg-[#1f5fb8] px-5 py-3 font-extrabold text-white">Sign in</button>
+        </form>
+        <p class="mt-3 font-semibold text-slate-500" id="login-status"></p>
+      </section>
+
+      <section id="editor-panel" class="hidden rounded-[28px] bg-white p-6 shadow-[0_26px_74px_rgba(18,42,82,0.15)]">
+        <div class="mb-4 flex items-center justify-between gap-4 max-[980px]:flex-col max-[980px]:items-stretch">
+          <h2 class="m-0 text-2xl font-extrabold uppercase text-slate-800">Edit Values</h2>
+          <button type="button" id="logout-button" class="rounded-[14px] bg-slate-200 px-5 py-3 font-extrabold text-slate-800">Logout</button>
+        </div>
+
+        <form id="editor-form">
+          <div class="mb-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <label class="grid gap-2 font-bold text-slate-800">Dashboard title
+              <div class="flex items-center gap-3">
+                <div id="dashboardTitleDisplay" class="px-4 py-3 rounded-[14px] bg-slate-50 text-slate-800 w-full">Target for the month of —</div>
+                <input data-path="dashboardTitle" type="hidden" />
+              </div>
+              <p class="text-xs text-slate-500 mt-1">This title is auto-generated from the selected month. Edit month label or month start date to change it.</p>
+            </label>
+            <label class="grid gap-2 font-bold text-slate-800">Month range
+              <div class="flex flex-col sm:flex-row gap-2 items-center">
+                <input data-path="monthStart" type="date" class="w-full rounded-[14px] border border-slate-300 bg-white px-4 py-3 font-sans text-slate-800 outline-none focus:border-[#1f5fb8] focus:ring-2 focus:ring-[#1f5fb8]/20" />
+                <span class="text-slate-500 hidden sm:inline">—</span>
+                <input data-path="monthEnd" type="date" class="w-full rounded-[14px] border border-slate-300 bg-white px-4 py-3 font-sans text-slate-800 outline-none focus:border-[#1f5fb8] focus:ring-2 focus:ring-[#1f5fb8]/20" />
+              </div>
+            </label>
+            <label class="grid gap-2 font-bold text-slate-800">Month label
+              <div class="flex flex-col sm:flex-row gap-2">
+                <select data-path="monthLabel" class="flex-1 w-full rounded-[14px] border border-slate-300 bg-white px-4 py-3 font-sans text-slate-800 outline-none focus:border-[#1f5fb8] focus:ring-2 focus:ring-[#1f5fb8]/20">
+                  <option value="">(none)</option>
+                  <option>January</option>
+                  <option>February</option>
+                  <option>March</option>
+                  <option>April</option>
+                  <option>May</option>
+                  <option>June</option>
+                  <option>July</option>
+                  <option>August</option>
+                  <option>September</option>
+                  <option>October</option>
+                  <option>November</option>
+                  <option>December</option>
+                  <option value="__custom">Custom…</option>
+                </select>
+                <input data-path="monthLabelCustom" placeholder="Custom label" class="hidden w-full sm:w-60 rounded-[14px] border border-slate-300 bg-white px-4 py-3 font-sans text-slate-800 outline-none focus:border-[#1f5fb8] focus:ring-2 focus:ring-[#1f5fb8]/20" />
+              </div>
+            </label>
+            <div class="col-span-1 sm:col-span-2 lg:col-span-1 grid gap-3">
+              <label class="grid gap-2 font-bold text-slate-800">Week title
+                <input data-path="weekTitle" type="text" class="w-full rounded-[14px] border border-slate-300 bg-white px-4 py-3 font-sans text-slate-800 outline-none focus:border-[#1f5fb8] focus:ring-2 focus:ring-[#1f5fb8]/20" />
+              </label>
+
+                <label class="grid gap-2 font-bold text-slate-800">Week selector
+                  <div class="flex flex-col gap-2">
+                    <input data-path="weekPicker" type="week" title="Select a week (ISO week). The readable date range will be shown below." class="w-full h-11 rounded-[14px] border border-slate-300 bg-white px-4 py-2 font-sans text-slate-800 outline-none focus:border-[#1f5fb8] focus:ring-2 focus:ring-[#1f5fb8]/20" aria-label="Select week" />
+                    <input data-path="weekRangeDisplay" readonly placeholder="Week range will appear here" class="w-full h-11 truncate rounded-[14px] border border-slate-200 bg-slate-50 px-4 py-2 font-sans text-slate-700" aria-label="Readable week range" />
+                    <p class="text-xs text-slate-500">Readable range auto-updates from the week selector. Edit the <strong>Week label</strong> to change display text.</p>
+                  </div>
+                </label>
+
+              <label class="grid gap-2 font-bold text-slate-800">Week label
+                <input data-path="weekLabel" type="text" class="w-full rounded-[14px] border border-slate-300 bg-white px-4 py-3 font-sans text-slate-800 outline-none focus:border-[#1f5fb8] focus:ring-2 focus:ring-[#1f5fb8]/20" />
+              </label>
+            </div>
+            <label class="grid gap-2 font-bold text-slate-800">Weekly section title <input data-path="weeklySectionTitle" type="text" class="w-full h-11 rounded-[14px] border border-slate-300 bg-white px-4 py-2 font-sans text-slate-800 outline-none focus:border-[#1f5fb8] focus:ring-2 focus:ring-[#1f5fb8]/20" /></label>
+            <label class="grid gap-2 font-bold text-slate-800">Month invoiced <input data-path="monthInvoiced" type="number" step="0.01" class="w-full h-11 rounded-[14px] border border-slate-300 bg-white px-4 py-2 font-sans text-slate-800 outline-none focus:border-[#1f5fb8] focus:ring-2 focus:ring-[#1f5fb8]/20" /></label>
+            <label class="grid gap-2 font-bold text-slate-800">Month target <input data-path="monthTarget" type="number" step="0.01" class="w-full h-11 rounded-[14px] border border-slate-300 bg-white px-4 py-2 font-sans text-slate-800 outline-none focus:border-[#1f5fb8] focus:ring-2 focus:ring-[#1f5fb8]/20" /></label>
+            <label class="grid gap-2 font-bold text-slate-800">Week invoiced <input data-path="weekInvoiced" type="number" step="0.01" class="w-full h-11 rounded-[14px] border border-slate-300 bg-white px-4 py-2 font-sans text-slate-800 outline-none focus:border-[#1f5fb8] focus:ring-2 focus:ring-[#1f5fb8]/20" /></label>
+            <label class="grid gap-2 font-bold text-slate-800">Week target <input data-path="weekTarget" type="number" step="0.01" class="w-full h-11 rounded-[14px] border border-slate-300 bg-white px-4 py-2 font-sans text-slate-800 outline-none focus:border-[#1f5fb8] focus:ring-2 focus:ring-[#1f5fb8]/20" /></label>
+            <label class="grid gap-2 font-bold text-slate-800">Week's % <input data-path="weeksPercent" type="number" step="1" class="w-full h-11 rounded-[14px] border border-slate-300 bg-white px-4 py-2 font-sans text-slate-800 outline-none focus:border-[#1f5fb8] focus:ring-2 focus:ring-[#1f5fb8]/20" /></label>
+            <label class="grid gap-2 font-bold text-slate-800">MTD % <input data-path="mtdPercent" type="number" step="1" class="w-full h-11 rounded-[14px] border border-slate-300 bg-white px-4 py-2 font-sans text-slate-800 outline-none focus:border-[#1f5fb8] focus:ring-2 focus:ring-[#1f5fb8]/20" /></label>
+            <label class="grid gap-2 font-bold text-slate-800">MTD invoiced <input data-path="mtdInvoiced" type="number" step="0.01" class="w-full h-11 rounded-[14px] border border-slate-300 bg-white px-4 py-2 font-sans text-slate-800 outline-none focus:border-[#1f5fb8] focus:ring-2 focus:ring-[#1f5fb8]/20" /></label>
+            <label class="grid gap-2 font-bold text-slate-800">Target <input data-path="target" type="number" step="0.01" class="w-full h-11 rounded-[14px] border border-slate-300 bg-white px-4 py-2 font-sans text-slate-800 outline-none focus:border-[#1f5fb8] focus:ring-2 focus:ring-[#1f5fb8]/20" /></label>
+            <label class="grid gap-2 font-bold text-slate-800">Daily target <input data-path="dailyTarget" type="number" step="0.01" class="w-full h-11 rounded-[14px] border border-slate-300 bg-white px-4 py-2 font-sans text-slate-800 outline-none focus:border-[#1f5fb8] focus:ring-2 focus:ring-[#1f5fb8]/20" /></label>
+          </div>
+
+          <div class="mt-5">
+            <div class="flex items-center justify-between gap-4 max-[980px]:flex-col max-[980px]:items-stretch">
+              <h3 class="m-0 text-xl font-extrabold text-slate-800">Weekly rows</h3>
+              <button type="button" id="add-week-button" class="rounded-[14px] bg-slate-200 px-4 py-3 font-extrabold text-slate-800">Add row</button>
+            </div>
+              <div class="mt-4 overflow-x-auto">
+              <table class="w-full border-collapse">
+                <thead class="bg-slate-50">
+                  <tr>
+                    <th class="border border-slate-300 px-3 py-2 text-left">Week</th>
+                    <th class="border border-slate-300 px-3 py-2 text-left">Start</th>
+                    <th class="border border-slate-300 px-3 py-2 text-left">End</th>
+                    <th class="border border-slate-300 px-3 py-2 text-left">Target</th>
+                    <th class="border border-slate-300 px-3 py-2 text-left">Invoiced</th>
+                    <th class="border border-slate-300 px-3 py-2 text-left">%</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="weekly-editor"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="mt-5 flex items-center justify-between gap-4 max-[980px]:flex-col max-[980px]:items-stretch">
+            <button type="submit" class="rounded-[14px] bg-[#1f5fb8] px-5 py-3 font-extrabold text-white">Save changes</button>
+            <p class="m-0 font-semibold text-slate-500" id="save-status"></p>
+          </div>
+        </form>
+      </section>
+    </main>
+
+    <script src="/admin.js"></script>
+  </body>
+</html>
