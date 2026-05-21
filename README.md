@@ -1,6 +1,6 @@
 # TV Display Backend
 
-Lightweight Node.js + Express app that serves the TV dashboard and stores its content in a local `data.json` file instead of a database.
+Lightweight Node.js + Express app that serves the TV dashboard and stores its content in JSONBin when configured, with a local `data.json` fallback for development.
 
 ## Requirements
 
@@ -28,16 +28,20 @@ Set these before starting the server:
 - `ADMIN_USERNAME`
 - `ADMIN_PASSWORD`
 - `PORT` (optional)
+- `JSONBIN_BIN_ID` to use JSONBin instead of `data.json`
+- `JSONBIN_API_KEY` to save updates to a private bin
+
+If `JSONBIN_BIN_ID` is not set, the app keeps using the local `data.json` file.
 
 ## API
 
 ### `GET /api/metrics`
-Returns the parsed contents of `data.json`.
+Returns the parsed contents of JSONBin when `JSONBIN_BIN_ID` is set, otherwise `data.json`.
 
 The file also carries dashboard metadata such as the page title, section labels, and date ranges.
 
 ### `POST /api/metrics`
-Overwrites `data.json` with the JSON body from the request.
+Overwrites JSONBin when configured, otherwise `data.json`, with the JSON body from the request.
 
 Example request:
 
@@ -51,7 +55,7 @@ curl -X POST http://localhost:3001/api/metrics \
 
 Open `http://localhost:3001/` for the TV view and `http://localhost:3001/admin` for the editor.
 
-The dashboard pulls its title, labels, ranges, and values from `data.json`.
+The dashboard pulls its title, labels, ranges, and values from JSONBin when configured, otherwise `data.json`.
 
 ## Admin Editor
 
