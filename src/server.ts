@@ -11,9 +11,6 @@ const dataFilePath = path.resolve(process.cwd(), 'data.json');
 const publicDir = path.resolve(process.cwd(), 'public');
 const adminUsername = process.env.ADMIN_USERNAME;
 const adminPassword = process.env.ADMIN_PASSWORD;
-const jsonBinBinId = process.env.JSONBIN_BIN_ID?.trim();
-const jsonBinApiKey = process.env.JSONBIN_API_KEY?.trim();
-const jsonBinBaseUrl = 'https://api.jsonbin.io/v3';
 const activeTokens = new Set<string>();
 
 app.use(cors());
@@ -35,41 +32,6 @@ app.get('/.well-known/appspecific/com.chrome.devtools.json', (_request: Request,
 function requireAuthConfig(): void {
   if (!adminUsername || !adminPassword) {
     throw new Error('Set ADMIN_USERNAME and ADMIN_PASSWORD in .env before starting the server.');
-  }
-}
-
-function isUsingJsonBin(): boolean {
-  return Boolean(jsonBinBinId);
-}
-
-function getJsonBinUrl(): string {
-  if (!jsonBinBinId) {
-    throw new Error('Set JSONBIN_BIN_ID in .env before starting the server.');
-  }
-
-  return `${jsonBinBaseUrl}/b/${jsonBinBinId}`;
-}
-
-function getJsonBinHeaders(includeContentType = false): Record<string, string> {
-  const headers: Record<string, string> = {};
-
-  if (includeContentType) {
-    headers['Content-Type'] = 'application/json';
-  }
-
-  if (jsonBinApiKey) {
-    headers['X-Master-Key'] = jsonBinApiKey;
-  }
-
-  return headers;
-}
-
-async function readJsonBinError(response: globalThis.Response): Promise<string> {
-  try {
-    const body = (await response.json()) as { message?: string };
-    return body.message || response.statusText || `Request failed (${response.status}).`;
-  } catch {
-    return response.statusText || `Request failed (${response.status}).`;
   }
 }
 
@@ -113,55 +75,26 @@ function requireAuth(request: Request, response: Response): boolean {
   return true;
 }
 
+async function ensureDataFile(): Promise<void> {
+  await fs.access(dataFilePath);
+}
+
 async function ensureAppConfiguration(): Promise<void> {
   requireAuthConfig();
 
-  if (!isUsingJsonBin()) {
-    try {
-      await fs.access(dataFilePath);
-    } catch (error) {
-      throw new Error(`data.json is missing or unreadable: ${(error as Error).message}`);
-    }
+  try {
+    await ensureDataFile();
+  } catch (error) {
+    throw new Error(`data.json is missing or unreadable: ${(error as Error).message}`);
   }
 }
 
 async function readMetrics(): Promise<unknown> {
-  if (isUsingJsonBin()) {
-    const response = await fetch(`${getJsonBinUrl()}/latest?meta=false`, {
-      headers: getJsonBinHeaders(),
-      cache: 'no-store',
-    });
-
-    if (!response.ok) {
-      throw new Error(await readJsonBinError(response));
-    }
-
-    return response.json();
-  }
-
   const raw = await fs.readFile(dataFilePath, 'utf8');
   return JSON.parse(raw);
 }
 
 async function writeMetrics(payload: unknown): Promise<void> {
-  if (isUsingJsonBin()) {
-    if (!jsonBinApiKey) {
-      throw new Error('Set JSONBIN_API_KEY in .env to save data to JSONBin.');
-    }
-
-    const response = await fetch(getJsonBinUrl(), {
-      method: 'PUT',
-      headers: getJsonBinHeaders(true),
-      body: JSON.stringify(payload),
-    });
-
-    if (!response.ok) {
-      throw new Error(await readJsonBinError(response));
-    }
-
-    return;
-  }
-
   await fs.writeFile(dataFilePath, `${JSON.stringify(payload, null, 2)}\n`, 'utf8');
 }
 
