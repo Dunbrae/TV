@@ -14,13 +14,15 @@ const modeToggleButton = document.getElementById('mode-toggle');
 const modeStatus = document.getElementById('mode-status');
 const dashboardCardsContainer = document.getElementById('dashboard-cards');
 const emptyStateContainer = document.getElementById('empty-state');
+const loadingStateContainer = document.getElementById('loading-state');
+const tableCard = document.querySelector('[data-carousel-card="table"]');
 
 let isCarouselMode = localStorage.getItem('tv-display-mode') === 'carousel';
 let carouselIndex = 0;
 let carouselTimer = null;
 
 function formatCurrency(value) {
-  if (value === null || value === undefined || Number.isNaN(Number(value))) {
+  if (value === null || value === undefined || value === '' || Number.isNaN(Number(value))) {
     return '$0';
   }
 
@@ -33,7 +35,7 @@ function formatPercent(value) {
 }
 
 function normalizePercent(value, target, invoiced) {
-  if (typeof value === 'number' && Number.isFinite(value)) {
+  if (typeof value === 'number' && Number.isFinite(value) && value > 0) {
     return Math.max(0, Math.min(100, value));
   }
 
@@ -47,15 +49,21 @@ function normalizePercent(value, target, invoiced) {
   return Math.max(0, Math.min(100, Math.round((fallbackInvoiced / fallbackTarget) * 100)));
 }
 
-function setDonut(element, percent) {
-  element.style.setProperty('--percent', String(percent));
+function setDonut(ringId, percent) {
+  const ring = document.getElementById(ringId);
+  if (ring) {
+    const percentVal = Math.max(0, Math.min(100, Number(percent) || 0));
+    const circumference = 251.2;
+    const offset = circumference - (circumference * percentVal) / 100;
+    ring.style.strokeDashoffset = String(offset);
+  }
 }
 
 function setText(id, value) {
   const element = document.getElementById(id);
 
   if (element) {
-    element.textContent = value;
+    element.textContent = value || '';
   }
 }
 
@@ -80,8 +88,16 @@ function isEmptyData(data) {
 }
 
 function setDashboardVisibility(hasData) {
+  if (loadingStateContainer) {
+    loadingStateContainer.classList.add('hidden');
+  }
+
   if (dashboardCardsContainer) {
     dashboardCardsContainer.classList.toggle('hidden', !hasData);
+  }
+
+  if (tableCard) {
+    tableCard.classList.toggle('hidden', !hasData);
   }
 
   if (emptyStateContainer) {
@@ -112,11 +128,10 @@ function clearDashboardValues() {
     'week-donut-label',
   ].forEach((id) => setText(id, ''));
 
-  // Keep a stable page title when the dashboard is empty
   setText('page-title', 'Dashboard');
 
-  setDonut(document.getElementById('month-donut'), 0);
-  setDonut(document.getElementById('week-donut'), 0);
+  setDonut('month-donut-ring', 0);
+  setDonut('week-donut-ring', 0);
 
   const tableBody = document.getElementById('weekly-table');
   if (tableBody) {
@@ -133,17 +148,39 @@ function applyCarouselState() {
 
   if (isCarouselMode) {
     dashboardCards.forEach((card, index) => {
-      card.classList.toggle('hidden', index !== carouselIndex);
+      if (index === carouselIndex) {
+        card.classList.remove('hidden');
+        card.classList.remove('opacity-0');
+        card.classList.add('opacity-100');
+      } else {
+        card.classList.add('hidden');
+        card.classList.remove('opacity-100');
+        card.classList.add('opacity-0');
+      }
     });
 
     document.body.classList.add('overflow-hidden');
-    modeToggleButton.textContent = 'Scroll mode';
+    modeToggleButton.innerHTML = `
+      <svg class="w-4.5 h-4.5 text-indigo-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+      Scroll mode
+    `;
     modeStatus.textContent = `Carousel mode: card ${carouselIndex + 1} of ${dashboardCards.length}`;
   } else {
-    dashboardCards.forEach((card) => card.classList.remove('hidden'));
+    dashboardCards.forEach((card) => {
+      card.classList.remove('hidden');
+      card.classList.remove('opacity-0');
+      card.classList.add('opacity-100');
+    });
 
     document.body.classList.remove('overflow-hidden');
-    modeToggleButton.textContent = 'Carousel mode';
+    modeToggleButton.innerHTML = `
+      <svg class="w-4.5 h-4.5 text-indigo-750" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 8H18.5" />
+      </svg>
+      Carousel mode
+    `;
     modeStatus.textContent = 'Scroll mode';
   }
 }
@@ -216,12 +253,12 @@ function render(data) {
   document.getElementById('month-invoiced').textContent = formatCurrency(data.monthInvoiced);
   document.getElementById('month-target').textContent = formatCurrency(data.monthTarget);
   document.getElementById('month-percent').textContent = formatPercent(monthPercent);
-  setDonut(document.getElementById('month-donut'), monthPercent);
+  setDonut('month-donut-ring', monthPercent);
 
   document.getElementById('week-invoiced').textContent = formatCurrency(data.weekInvoiced);
   document.getElementById('week-target').textContent = formatCurrency(data.weekTarget);
   document.getElementById('week-percent').textContent = formatPercent(weekPercent);
-  setDonut(document.getElementById('week-donut'), weekPercent);
+  setDonut('week-donut-ring', weekPercent);
 
   document.getElementById('weeks-percent').textContent = formatPercent(data.weeksPercent);
   document.getElementById('mtd-percent').textContent = formatPercent(data.mtdPercent);
@@ -239,7 +276,7 @@ function render(data) {
   if (!rows.length) {
     tableBody.innerHTML = `
       <tr>
-        <td class="border-2 border-[#3d3d3d] px-3 py-6 text-center font-bold text-slate-500" colspan="6">No weekly data yet.</td>
+        <td class="px-6 py-8 text-center font-bold text-slate-500" colspan="6">No weekly data yet.</td>
       </tr>
     `;
     return;
@@ -248,13 +285,13 @@ function render(data) {
   tableBody.innerHTML = rows
     .map(
       (row) => `
-        <tr class="odd:bg-slate-50">
-          <td class="border-2 border-[#3d3d3d] px-3 py-2 font-bold">${row.week ?? ''}</td>
-          <td class="border-2 border-[#3d3d3d] px-3 py-2 font-bold">${row.start ?? ''}</td>
-          <td class="border-2 border-[#3d3d3d] px-3 py-2 font-bold">${row.end ?? ''}</td>
-          <td class="border-2 border-[#3d3d3d] px-3 py-2 text-right font-bold">${formatCurrency(row.target)}</td>
-          <td class="border-2 border-[#3d3d3d] px-3 py-2 text-right font-bold">${row.invoiced === null ? '' : formatCurrency(row.invoiced)}</td>
-          <td class="border-2 border-[#3d3d3d] px-3 py-2 text-right font-bold">${formatPercent(row.percent)}</td>
+        <tr class="hover:bg-slate-50/50 transition-colors border-b border-slate-100">
+          <td class="py-4.5 px-6 font-bold text-slate-900">${row.week ?? ''}</td>
+          <td class="py-4.5 px-6 text-slate-600 font-medium">${row.start ?? ''}</td>
+          <td class="py-4.5 px-6 text-slate-600 font-medium">${row.end ?? ''}</td>
+          <td class="py-4.5 px-6 text-right font-bold text-slate-700">${formatCurrency(row.target)}</td>
+          <td class="py-4.5 px-6 text-right font-bold text-indigo-700">${row.invoiced === null ? '' : formatCurrency(row.invoiced)}</td>
+          <td class="py-4.5 px-6 text-right font-black text-slate-900">${formatPercent(row.percent)}</td>
         </tr>
       `,
     )

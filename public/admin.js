@@ -12,9 +12,52 @@ const defaultWeeklyRow = {
   percent: '',
 };
 
-function setMessage(element, message, isError = false) {
-  element.textContent = message;
-  element.className = isError ? 'mt-3 font-semibold text-[#d21f1f]' : 'mt-3 font-semibold text-slate-500';
+function showToast(message, type = 'success') {
+  const toast = document.getElementById('toast');
+  const msgEl = document.getElementById('toast-message');
+  const iconEl = document.getElementById('toast-icon');
+
+  if (!toast || !msgEl || !iconEl) return;
+
+  msgEl.textContent = message;
+
+  if (type === 'success') {
+    iconEl.innerHTML = `
+      <svg class="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    `;
+  } else if (type === 'error') {
+    iconEl.innerHTML = `
+      <svg class="w-5 h-5 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+      </svg>
+    `;
+  } else {
+    iconEl.innerHTML = `
+      <svg class="w-5 h-5 text-indigo-400 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 8H18.5" />
+      </svg>
+    `;
+  }
+
+  toast.classList.remove('translate-y-12', 'opacity-0', 'pointer-events-none');
+  toast.classList.add('translate-y-0', 'opacity-100');
+
+  if (type !== 'info') {
+    if (window.toastTimeout) clearTimeout(window.toastTimeout);
+    window.toastTimeout = setTimeout(() => {
+      hideToast();
+    }, 4000);
+  }
+}
+
+function hideToast() {
+  const toast = document.getElementById('toast');
+  if (toast) {
+    toast.classList.remove('translate-y-0', 'opacity-100');
+    toast.classList.add('translate-y-12', 'opacity-0', 'pointer-events-none');
+  }
 }
 
 function requireData() {
@@ -28,6 +71,7 @@ function getAuthHeaders() {
 }
 
 function readNumber(input) {
+  if (!input) return null;
   const value = input.value.trim();
   return value === '' ? null : Number(value);
 }
@@ -53,14 +97,20 @@ function renderWeeklyRows(rows) {
   table.innerHTML = rows
     .map(
       (row, index) => `
-        <tr class="odd:bg-slate-50">
-          <td class="border border-slate-300 p-2"><input data-row="${index}" data-field="week" value="${row.week ?? ''}" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 font-sans outline-none focus:border-[#1f5fb8] focus:ring-2 focus:ring-[#1f5fb8]/20" /></td>
-          <td class="border border-slate-300 p-2"><input data-row="${index}" data-field="start" value="${row.start ?? ''}" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 font-sans outline-none focus:border-[#1f5fb8] focus:ring-2 focus:ring-[#1f5fb8]/20" /></td>
-          <td class="border border-slate-300 p-2"><input data-row="${index}" data-field="end" value="${row.end ?? ''}" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 font-sans outline-none focus:border-[#1f5fb8] focus:ring-2 focus:ring-[#1f5fb8]/20" /></td>
-          <td class="border border-slate-300 p-2"><input data-row="${index}" data-field="target" type="number" step="0.01" value="${row.target ?? ''}" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 font-sans outline-none focus:border-[#1f5fb8] focus:ring-2 focus:ring-[#1f5fb8]/20" /></td>
-          <td class="border border-slate-300 p-2"><input data-row="${index}" data-field="invoiced" type="number" step="0.01" value="${row.invoiced ?? ''}" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 font-sans outline-none focus:border-[#1f5fb8] focus:ring-2 focus:ring-[#1f5fb8]/20" /></td>
-          <td class="border border-slate-300 p-2"><input data-row="${index}" data-field="percent" type="number" step="1" value="${row.percent ?? ''}" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 font-sans outline-none focus:border-[#1f5fb8] focus:ring-2 focus:ring-[#1f5fb8]/20" /></td>
-          <td class="border border-slate-300 p-2"><button type="button" class="rounded-xl bg-[#ffe5e5] px-3 py-2 font-bold text-[#d21f1f]" data-remove-row="${index}">Remove</button></td>
+        <tr class="hover:bg-slate-50 transition-colors">
+          <td class="px-4 py-3"><input data-row="${index}" data-field="week" value="${row.week ?? ''}" placeholder="e.g. Week 19" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-800 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all" /></td>
+          <td class="px-4 py-3"><input data-row="${index}" data-field="start" value="${row.start ?? ''}" placeholder="e.g. May 4, 2026" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-800 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all" /></td>
+          <td class="px-4 py-3"><input data-row="${index}" data-field="end" value="${row.end ?? ''}" placeholder="e.g. May 10, 2026" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-800 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all" /></td>
+          <td class="px-4 py-3"><input data-row="${index}" data-field="target" type="number" step="0.01" value="${row.target ?? ''}" placeholder="30000" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-800 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all" /></td>
+          <td class="px-4 py-3"><input data-row="${index}" data-field="invoiced" type="number" step="0.01" value="${row.invoiced ?? ''}" placeholder="31500" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-800 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all" /></td>
+          <td class="px-4 py-3"><input data-row="${index}" data-field="percent" type="number" step="1" value="${row.percent ?? ''}" placeholder="105" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-800 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all" /></td>
+          <td class="px-4 py-3 text-center">
+            <button type="button" class="inline-flex items-center justify-center w-8.5 h-8.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 hover:text-rose-700 transition-colors border border-rose-100" data-remove-row="${index}" title="Remove row">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </button>
+          </td>
         </tr>
       `,
     )
@@ -76,16 +126,47 @@ function renderWeeklyRows(rows) {
   });
 }
 
+function updateDashboardTitleDisplay() {
+  const startInput = document.querySelector('[data-path="monthStart"]');
+  const sel = document.querySelector('[data-path="monthLabel"]');
+  const custom = document.querySelector('[data-path="monthLabelCustom"]');
+  const dashboardDisplay = document.getElementById('dashboardTitleDisplay');
+  const hiddenTitle = document.querySelector('[data-path="dashboardTitle"]');
+
+  const computeMonthName = () => {
+    if (sel && sel.value === '__custom' && custom && custom.value.trim()) {
+      return custom.value.trim();
+    }
+    if (sel && sel.value && sel.value !== '__custom') {
+      return sel.value;
+    }
+    const s = startInput?.value;
+    if (s) {
+      const d = new Date(s);
+      if (!Number.isNaN(d.getTime())) {
+        const utcDate = new Date(d.getTime() + d.getTimezoneOffset() * 60000);
+        return utcDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+      }
+    }
+    return '';
+  };
+
+  const monthName = computeMonthName();
+  const titleText = monthName ? `Target for the month of ${monthName}` : 'Target for the month of —';
+  if (dashboardDisplay) dashboardDisplay.textContent = titleText;
+  if (hiddenTitle) hiddenTitle.value = titleText;
+}
+
 function populateForm(data) {
   requireData();
 
   document.querySelector('[data-path="dashboardTitle"]').value = data.dashboardTitle ?? '';
-  // monthRange is now two date inputs (monthStart / monthEnd). Try to parse existing monthRange.
+  
   const startInput = document.querySelector('[data-path="monthStart"]');
   const endInput = document.querySelector('[data-path="monthEnd"]');
+  
   const parseToISO = (text) => {
     if (!text) return '';
-    // split by dash if the stored format is like "May 1, 2026 - May 31, 2026"
     const parts = String(text).split(' - ').map((p) => p.trim());
     const pick = parts[0] || text;
     const d = new Date(pick);
@@ -98,7 +179,7 @@ function populateForm(data) {
 
   if (startInput && endInput) {
     startInput.value = parseToISO(data.monthRange) || (data.monthStart ? parseToISO(data.monthStart) : '');
-    // end may be stored as second part of monthRange or as monthEnd
+    
     const endIso = (function(){
       if (data.monthRange) {
         const parts = String(data.monthRange).split(' - ').map((p) => p.trim());
@@ -117,9 +198,11 @@ function populateForm(data) {
 
     endInput.value = endIso || '';
   }
+
   const monthSelect = document.querySelector('[data-path="monthLabel"]');
   const monthCustom = document.querySelector('[data-path="monthLabelCustom"]');
   const months = Array.from(monthSelect.options).map((o) => o.value || o.text).filter(Boolean);
+
   if (data.monthLabel && months.includes(data.monthLabel)) {
     monthSelect.value = data.monthLabel;
     monthCustom.value = '';
@@ -133,11 +216,11 @@ function populateForm(data) {
     monthCustom.value = '';
     monthCustom.classList.add('hidden');
   }
+
   document.querySelector('[data-path="weekTitle"]').value = data.weekTitle ?? '';
-  // weekRange is now selected via a week picker (`type="week"`). Populate it if we can infer a week.
+  
   const weekPicker = document.querySelector('[data-path="weekPicker"]');
   if (weekPicker) {
-    // try to infer from data.weekRange (e.g., "May 17, 2026 - May 23, 2026")
     const inferWeek = (text) => {
       if (!text) return '';
       const parts = String(text).split(' - ').map((p) => p.trim());
@@ -152,12 +235,13 @@ function populateForm(data) {
       return `${year}-W${String(weekNo).padStart(2, '0')}`;
     };
 
-      weekPicker.value = data.weekPicker || inferWeek(data.weekRange) || '';    
-      const display = document.querySelector('[data-path="weekRangeDisplay"]');
-      if (display) {
-        display.value = computeWeekRangeFromPicker(weekPicker.value) || '';
-      }
+    weekPicker.value = data.weekPicker || inferWeek(data.weekRange) || '';    
+    const display = document.querySelector('[data-path="weekRangeDisplay"]');
+    if (display) {
+      display.value = computeWeekRangeFromPicker(weekPicker.value) || '';
+    }
   }
+
   document.querySelector('[data-path="weekLabel"]').value = data.weekLabel ?? '';
   document.querySelector('[data-path="weeklySectionTitle"]').value = data.weeklySectionTitle ?? '';
   document.querySelector('[data-path="monthInvoiced"]').value = data.monthInvoiced ?? '';
@@ -169,31 +253,13 @@ function populateForm(data) {
   document.querySelector('[data-path="mtdInvoiced"]').value = data.mtdInvoiced ?? '';
   document.querySelector('[data-path="target"]').value = data.target ?? '';
   document.querySelector('[data-path="dailyTarget"]').value = data.dailyTarget ?? '';
+  
   renderWeeklyRows(Array.isArray(data.weeklyData) ? data.weeklyData : []);
-    // update dashboard title display based on month label or monthStart
-    const dashboardDisplay = document.getElementById('dashboardTitleDisplay');
-    const hiddenTitle = document.querySelector('[data-path="dashboardTitle"]');
-    const computeMonthName = () => {
-      const sel = document.querySelector('[data-path="monthLabel"]');
-      const custom = document.querySelector('[data-path="monthLabelCustom"]');
-      if (sel && sel.value === '__custom' && custom && custom.value.trim()) return custom.value.trim();
-      if (sel && sel.value) return sel.value;
-      const s = startInput?.value;
-      if (s) {
-        const d = new Date(s);
-        if (!Number.isNaN(d.getTime())) return d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-      }
-      return '';
-    };
-    const monthName = computeMonthName();
-    const titleText = monthName ? `Target for the month of ${monthName}` : 'Target for the month of —';
-    if (dashboardDisplay) dashboardDisplay.textContent = titleText;
-    if (hiddenTitle) hiddenTitle.value = titleText;
+  updateDashboardTitleDisplay();
 }
 
 function collectPayload() {
   const payload = {
-    // dashboardTitle is auto-generated
     dashboardTitle: document.querySelector('[data-path="dashboardTitle"]')?.value.trim() || '',
     monthRange: (function(){
       const s = document.querySelector('[data-path="monthStart"]')?.value || '';
@@ -203,7 +269,8 @@ function collectPayload() {
         if (!iso) return '';
         const d = new Date(iso);
         if (Number.isNaN(d.getTime())) return '';
-        return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+        const utcDate = new Date(d.getTime() + d.getTimezoneOffset() * 60000);
+        return utcDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
       };
       const startText = parseAndFormat(s);
       const endText = parseAndFormat(e);
@@ -232,12 +299,14 @@ function collectPayload() {
       function getDateOfISOWeek(wk, yr) {
         const jan4 = new Date(Date.UTC(yr, 0, 4));
         const dayOfWeek = jan4.getUTCDay() || 7;
-        const mon = new Date(Date.UTC(yr, 0, 4 - (dayOfWeek - 1) + (wk - 1) * 7));
-        return mon;
+        return new Date(Date.UTC(yr, 0, 4 - (dayOfWeek - 1) + (wk - 1) * 7));
       }
       const start = getDateOfISOWeek(week, year);
       const end = new Date(Date.UTC(start.getUTCFullYear(), start.getUTCMonth(), start.getUTCDate() + 6));
-      const format = (d) => d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+      const format = (d) => {
+        const utcDate = new Date(d.getTime() + d.getTimezoneOffset() * 60000);
+        return utcDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+      };
       return `${format(start)} - ${format(end)}`;
     })(),
     weekLabel: document.querySelector('[data-path="weekLabel"]')?.value.trim(),
@@ -257,23 +326,25 @@ function collectPayload() {
   return payload;
 }
 
-  function computeWeekRangeFromPicker(pickerValue) {
-    if (!pickerValue) return '';
-    const [yearStr, weekStr] = pickerValue.split('-W');
-    const year = Number(yearStr);
-    const week = Number(weekStr);
-    if (!year || !week) return '';
-    function getDateOfISOWeek(wk, yr) {
-      const jan4 = new Date(Date.UTC(yr, 0, 4));
-      const dayOfWeek = jan4.getUTCDay() || 7;
-      const mon = new Date(Date.UTC(yr, 0, 4 - (dayOfWeek - 1) + (wk - 1) * 7));
-      return mon;
-    }
-    const start = getDateOfISOWeek(week, year);
-    const end = new Date(Date.UTC(start.getUTCFullYear(), start.getUTCMonth(), start.getUTCDate() + 6));
-    const format = (d) => d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-    return `${format(start)} - ${format(end)}`;
+function computeWeekRangeFromPicker(pickerValue) {
+  if (!pickerValue) return '';
+  const [yearStr, weekStr] = pickerValue.split('-W');
+  const year = Number(yearStr);
+  const week = Number(weekStr);
+  if (!year || !week) return '';
+  function getDateOfISOWeek(wk, yr) {
+    const jan4 = new Date(Date.UTC(yr, 0, 4));
+    const dayOfWeek = jan4.getUTCDay() || 7;
+    return new Date(Date.UTC(yr, 0, 4 - (dayOfWeek - 1) + (wk - 1) * 7));
   }
+  const start = getDateOfISOWeek(week, year);
+  const end = new Date(Date.UTC(start.getUTCFullYear(), start.getUTCMonth(), start.getUTCDate() + 6));
+  const format = (d) => {
+    const utcDate = new Date(d.getTime() + d.getTimezoneOffset() * 60000);
+    return utcDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  };
+  return `${format(start)} - ${format(end)}`;
+}
 
 async function loadDashboard() {
   const response = await fetch('/api/metrics', {
@@ -292,11 +363,10 @@ async function loadDashboard() {
 async function login(event) {
   event.preventDefault();
 
-  const loginStatus = document.getElementById('login-status');
   const username = document.getElementById('username').value.trim();
   const password = document.getElementById('password').value;
 
-  setMessage(loginStatus, 'Signing in...');
+  showToast('Signing in...', 'info');
 
   try {
     const response = await fetch('/api/login', {
@@ -315,18 +385,17 @@ async function login(event) {
 
     document.getElementById('login-panel').classList.add('hidden');
     document.getElementById('editor-panel').classList.remove('hidden');
-    setMessage(loginStatus, '');
+    showToast('Signed in successfully!', 'success');
     await loadDashboard();
   } catch (error) {
-    setMessage(loginStatus, error.message || 'Login failed.', true);
+    showToast(error.message || 'Login failed.', 'error');
   }
 }
 
 async function saveChanges(event) {
   event.preventDefault();
 
-  const saveStatus = document.getElementById('save-status');
-  setMessage(saveStatus, 'Saving changes...');
+  showToast('Saving changes...', 'info');
 
   try {
     const payload = collectPayload();
@@ -345,9 +414,9 @@ async function saveChanges(event) {
 
     currentData = payload;
     const now = new Date();
-    setMessage(saveStatus, `Saved — ${now.toLocaleString()}`);
+    showToast(`Saved successfully at ${now.toLocaleTimeString()}`, 'success');
   } catch (error) {
-    setMessage(saveStatus, error.message || 'Save failed.', true);
+    showToast(error.message || 'Save failed.', 'error');
   }
 }
 
@@ -362,7 +431,7 @@ function logout() {
   localStorage.removeItem(tokenKey);
   document.getElementById('editor-panel').classList.add('hidden');
   document.getElementById('login-panel').classList.remove('hidden');
-  setMessage(document.getElementById('login-status'), 'Logged out.');
+  showToast('Logged out.', 'success');
 }
 
 async function bootstrap() {
@@ -371,7 +440,6 @@ async function bootstrap() {
   document.getElementById('add-week-button').addEventListener('click', addRow);
   document.getElementById('logout-button').addEventListener('click', logout);
 
-  // Toggle custom month input when user selects 'Custom…'
   const monthSelect = document.querySelector('[data-path="monthLabel"]');
   const monthCustom = document.querySelector('[data-path="monthLabelCustom"]');
   if (monthSelect && monthCustom) {
@@ -383,10 +451,18 @@ async function bootstrap() {
         monthCustom.classList.add('hidden');
         monthCustom.value = '';
       }
+      updateDashboardTitleDisplay();
     });
   }
 
-  // Update week range display when the week picker changes
+  const monthStartInput = document.querySelector('[data-path="monthStart"]');
+  if (monthStartInput) {
+    monthStartInput.addEventListener('change', updateDashboardTitleDisplay);
+  }
+  if (monthCustom) {
+    monthCustom.addEventListener('input', updateDashboardTitleDisplay);
+  }
+
   const weekPicker = document.querySelector('[data-path="weekPicker"]');
   const weekDisplay = document.querySelector('[data-path="weekRangeDisplay"]');
   if (weekPicker && weekDisplay) {
@@ -395,7 +471,6 @@ async function bootstrap() {
     });
   }
 
-  // Keyboard shortcut: Ctrl/Cmd+S to save the form
   document.addEventListener('keydown', (e) => {
     const isSave = (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's';
     if (isSave) {
@@ -420,7 +495,7 @@ async function bootstrap() {
     localStorage.removeItem(tokenKey);
     document.getElementById('login-panel').classList.remove('hidden');
     document.getElementById('editor-panel').classList.add('hidden');
-    setMessage(document.getElementById('login-status'), 'Session expired. Please sign in again.', true);
+    showToast('Session expired. Please sign in again.', 'error');
   }
 }
 
