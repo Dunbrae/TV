@@ -28,6 +28,7 @@ Set these before starting the server:
 - `ADMIN_USERNAME`
 - `ADMIN_PASSWORD`
 - `PORT` (optional)
+- `AUTH_SECRET` (optional, but recommended for Vercel)
 - `MONGODB_URI`
 - `MONGODB_DB` (optional, defaults to `tv_display`)
 - `MONGODB_COLLECTION` (optional, defaults to `metrics`)
@@ -59,3 +60,5 @@ The dashboard pulls its title, labels, ranges, and values from MongoDB Atlas. If
 Open `http://localhost:3001/admin` to sign in and edit the values.
 
 Set `ADMIN_USERNAME`, `ADMIN_PASSWORD`, and `MONGODB_URI` in the environment before launch, and add your IP to the Atlas Network Access list.
+
+For Vercel deployments, also set `AUTH_SECRET` so login tokens can be verified across serverless invocations.

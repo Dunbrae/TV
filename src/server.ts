@@ -14,8 +14,10 @@ const mongoUri = process.env.MONGODB_URI;
 const mongoDbName = process.env.MONGODB_DB || 'tv_display';
 const mongoCollectionName = process.env.MONGODB_COLLECTION || 'metrics';
 const metricsDocumentId = 'dashboard-metrics';
-const activeTokens = new Set<string>();
 const mongoClient = mongoUri ? new MongoClient(mongoUri) : null;
+const authSecret = process.env.AUTH_SECRET || `${adminUsername ?? ''}:${adminPassword ?? ''}`;
+const tokenTtlMs = 24 * 60 * 60 * 1000;
+const isVercel = process.env.VERCEL === '1';
 
 type MetricsPayload = Record<string, unknown>;
 
@@ -23,6 +25,11 @@ type MetricsDocument = Document & {
   _id: string;
   payload: MetricsPayload;
   updatedAt: Date;
+};
+
+type AuthTokenPayload = {
+  sub: string;
+  exp: number;
 };
 
 let metricsCollection: Collection<MetricsDocument> | null = null;
@@ -55,6 +62,53 @@ function requireMongoConfig(): void {
   }
 }
 
+function base64UrlEncode(input: string): string {
+  return Buffer.from(input, 'utf8').toString('base64').replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+}
+
+function base64UrlDecode(input: string): string {
+  const normalized = input.replace(/-/g, '+').replace(/_/g, '/');
+  const padded = normalized + '='.repeat((4 - (normalized.length % 4)) % 4);
+  return Buffer.from(padded, 'base64').toString('utf8');
+}
+
+function signTokenPayload(payload: AuthTokenPayload): string {
+  return crypto.createHmac('sha256', authSecret).update(JSON.stringify(payload)).digest('base64url');
+}
+
+function issueAuthToken(username: string): string {
+  const payload: AuthTokenPayload = {
+    sub: username,
+    exp: Date.now() + tokenTtlMs,
+  };
+
+  const encodedPayload = base64UrlEncode(JSON.stringify(payload));
+  const signature = signTokenPayload(payload);
+
+  return `${encodedPayload}.${signature}`;
+}
+
+function verifyAuthToken(token: string): boolean {
+  const [encodedPayload, signature] = token.split('.');
+
+  if (!encodedPayload || !signature) {
+    return false;
+  }
+
+  try {
+    const payload = JSON.parse(base64UrlDecode(encodedPayload)) as AuthTokenPayload;
+
+    if (!payload.sub || !payload.exp || payload.exp < Date.now()) {
+      return false;
+    }
+
+    const expectedSignature = signTokenPayload(payload);
+    return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature));
+  } catch {
+    return false;
+  }
+}
+
 app.post('/api/login', (request: Request, response: Response) => {
   if (!adminUsername || !adminPassword) {
     response.status(500).json({ message: 'Authentication is not configured.' });
@@ -68,8 +122,7 @@ app.post('/api/login', (request: Request, response: Response) => {
     return;
   }
 
-  const token = crypto.randomBytes(24).toString('hex');
-  activeTokens.add(token);
+  const token = issueAuthToken(username);
 
   response.json({ token });
 });
@@ -87,7 +140,7 @@ function getBearerToken(request: Request): string | null {
 function requireAuth(request: Request, response: Response): boolean {
   const token = getBearerToken(request);
 
-  if (!token || !activeTokens.has(token)) {
+  if (!token || !verifyAuthToken(token)) {
     response.status(401).json({ message: 'Unauthorized.' });
     return false;
   }
@@ -213,7 +266,11 @@ async function startServer(): Promise<void> {
   await listen(port);
 }
 
-startServer().catch((error) => {
-  console.error('Failed to start server:', error);
-  process.exit(1);
-});
+export default app;
+
+if (!isVercel && require.main === module) {
+  startServer().catch((error) => {
+    console.error('Failed to start server:', error);
+    process.exit(1);
+  });
+}
