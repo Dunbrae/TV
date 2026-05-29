@@ -1,0 +1,92 @@
+# Setup and Run Instructions
+
+This document explains how to install, configure, and run the TV Display backend locally.
+
+**Prerequisites**
+
+- Node.js 18+ (LTS recommended)
+- npm (comes with Node.js)
+
+**Install dependencies**
+
+Run from the project root:
+
+```bash
+npm install
+```
+
+**Environment configuration**
+
+The server requires an admin username and password to be set via environment variables. Create a `.env` file in the project root with the following values:
+
+```
+ADMIN_USERNAME=your-admin-username
+ADMIN_PASSWORD=your-strong-password
+# Optional: PORT=3001
+```
+
+On Windows PowerShell you can create the file with:
+
+```powershell
+@"
+ADMIN_USERNAME=your-admin-username
+ADMIN_PASSWORD=your-strong-password
+"@ > .env
+```
+
+Make sure `data.json` exists in the project root and is readable by the server. A minimal starting file is an empty JSON object:
+
+```json
+{}
+```
+
+**Development**
+
+Run the development server (auto-restarts on change):
+
+```bash
+npm run dev
+```
+
+This uses `ts-node-dev` and serves the static dashboard pages from the `public/` directory. The default port is `3001` unless `PORT` is set.
+
+Open these URLs in your browser:
+
+- TV view: http://localhost:3001/
+- Admin editor: http://localhost:3001/admin
+
+**Build and Production**
+
+Compile TypeScript to JavaScript and run the compiled server:
+
+```bash
+npm run build
+npm start
+```
+
+The compiled entrypoint is `dist/server.js` (see `package.json` scripts).
+
+**API**
+
+- `GET /api/metrics` — Returns the parsed contents of `data.json`.
+- `POST /api/metrics` — Requires authentication. Overwrites `data.json` with the supplied JSON body.
+
+To call the `POST` endpoint from the admin UI, sign in at `/admin` to obtain a bearer token. Example curl (replace `<TOKEN>`):
+
+```bash
+curl -X POST http://localhost:3001/api/metrics \
+  -H "Authorization: Bearer <TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{"monthInvoiced":123,"monthTarget":456}'
+```
+
+**Troubleshooting & Notes**
+
+- If the server exits with an error instructing you to set `ADMIN_USERNAME` and `ADMIN_PASSWORD`, verify your `.env` file is present and correctly formatted.
+- If the chosen `PORT` is in use, the server will automatically try the next port and log a warning.
+- Ensure the process has read/write permissions for `data.json` since the server reads and overwrites it.
+
+**Next steps**
+
+- Customize `data.json` to contain the dashboard metadata and values used by the UI.
+- For production deployment, run behind a process manager (PM2/systemd) and/or a reverse proxy.
