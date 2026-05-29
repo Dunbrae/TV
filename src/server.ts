@@ -15,9 +15,7 @@ const mongoDbName = process.env.MONGODB_DB || 'tv_display';
 const mongoCollectionName = process.env.MONGODB_COLLECTION || 'metrics';
 const metricsDocumentId = 'dashboard-metrics';
 const mongoClient = mongoUri ? new MongoClient(mongoUri) : null;
-const authSecret = process.env.AUTH_SECRET || `${adminUsername ?? ''}:${adminPassword ?? ''}`;
 const tokenTtlMs = 24 * 60 * 60 * 1000;
-const isVercel = process.env.VERCEL === '1';
 
 type MetricsPayload = Record<string, unknown>;
 
@@ -73,7 +71,7 @@ function base64UrlDecode(input: string): string {
 }
 
 function signTokenPayload(payload: AuthTokenPayload): string {
-  return crypto.createHmac('sha256', authSecret).update(JSON.stringify(payload)).digest('base64url');
+  return crypto.createHmac('sha256', `${adminUsername ?? ''}:${adminPassword ?? ''}`).update(JSON.stringify(payload)).digest('base64url');
 }
 
 function issueAuthToken(username: string): string {
@@ -269,7 +267,7 @@ async function startServer(): Promise<void> {
 export default app;
 module.exports = app;
 
-if (!isVercel && require.main === module) {
+if (require.main === module) {
   startServer().catch((error) => {
     console.error('Failed to start server:', error);
     process.exit(1);

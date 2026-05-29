@@ -17,12 +17,11 @@ npm install
 
 **Environment configuration**
 
-The server requires an admin username, password, MongoDB Atlas connection string, and a signing secret to be set via environment variables. Create a `.env` file in the project root with the following values:
+The server requires an admin username, password, and MongoDB Atlas connection string to be set via environment variables. Create a `.env` file in the project root with the following values:
 
 ```
 ADMIN_USERNAME=your-admin-username
 ADMIN_PASSWORD=your-strong-password
-AUTH_SECRET=generate-a-long-random-string
 MONGODB_URI=mongodb+srv://<username>:<password>@<cluster>.mongodb.net/?retryWrites=true&w=majority
 MONGODB_DB=tv_display
 MONGODB_COLLECTION=metrics
@@ -35,7 +34,6 @@ On Windows PowerShell you can create the file with:
 @"
 ADMIN_USERNAME=your-admin-username
 ADMIN_PASSWORD=your-strong-password
-AUTH_SECRET=generate-a-long-random-string
 MONGODB_URI=mongodb+srv://<username>:<password>@<cluster>.mongodb.net/?retryWrites=true&w=majority
 MONGODB_DB=tv_display
 MONGODB_COLLECTION=metrics
@@ -47,8 +45,6 @@ Before starting the server, make sure your Atlas cluster is ready:
 1. Create a database user in Atlas and copy the connection string.
 2. Add your current IP address to the Atlas Network Access list.
 3. Use database and collection names that match the values in your `.env` file.
-4. Generate a strong `AUTH_SECRET` and keep it the same across deploys.
-
 You do not need a local `data.json` file anymore.
 
 **Development**
@@ -98,7 +94,6 @@ curl -X POST http://localhost:3001/api/metrics \
 - If the server exits with an error instructing you to set `ADMIN_USERNAME`, `ADMIN_PASSWORD`, or `MONGODB_URI`, verify your `.env` file is present and correctly formatted.
 - If the chosen `PORT` is in use, the server will automatically try the next port and log a warning.
 - If Atlas rejects the connection, confirm your IP is on the Network Access list and the connection string uses the correct username, password, and cluster hostname.
-- If login stops working after a redeploy, confirm `AUTH_SECRET` has not changed.
 
 **Next steps**
 
