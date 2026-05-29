@@ -1,6 +1,6 @@
 # Setup and Run Instructions
 
-This document explains how to install, configure, and run the TV Display backend locally.
+This document explains how to install, configure, and run the TV Display backend locally with MongoDB Atlas.
 
 **Prerequisites**
 
@@ -17,11 +17,14 @@ npm install
 
 **Environment configuration**
 
-The server requires an admin username and password to be set via environment variables. Create a `.env` file in the project root with the following values:
+The server requires an admin username, password, and MongoDB Atlas connection string to be set via environment variables. Create a `.env` file in the project root with the following values:
 
 ```
 ADMIN_USERNAME=your-admin-username
 ADMIN_PASSWORD=your-strong-password
+MONGODB_URI=mongodb+srv://<username>:<password>@<cluster>.mongodb.net/?retryWrites=true&w=majority
+MONGODB_DB=tv_display
+MONGODB_COLLECTION=metrics
 # Optional: PORT=3001
 ```
 
@@ -31,14 +34,19 @@ On Windows PowerShell you can create the file with:
 @"
 ADMIN_USERNAME=your-admin-username
 ADMIN_PASSWORD=your-strong-password
+MONGODB_URI=mongodb+srv://<username>:<password>@<cluster>.mongodb.net/?retryWrites=true&w=majority
+MONGODB_DB=tv_display
+MONGODB_COLLECTION=metrics
 "@ > .env
 ```
 
-Make sure `data.json` exists in the project root and is readable by the server. A minimal starting file is an empty JSON object:
+Before starting the server, make sure your Atlas cluster is ready:
 
-```json
-{}
-```
+1. Create a database user in Atlas and copy the connection string.
+2. Add your current IP address to the Atlas Network Access list.
+3. Use database and collection names that match the values in your `.env` file.
+
+You do not need a local `data.json` file anymore.
 
 **Development**
 
@@ -49,6 +57,8 @@ npm run dev
 ```
 
 This uses `ts-node-dev` and serves the static dashboard pages from the `public/` directory. The default port is `3001` unless `PORT` is set.
+
+The server binds to `0.0.0.0`, so other devices on the same network can reach it once the app is running and the firewall allows the port.
 
 Open these URLs in your browser:
 
@@ -68,8 +78,8 @@ The compiled entrypoint is `dist/server.js` (see `package.json` scripts).
 
 **API**
 
-- `GET /api/metrics` — Returns the parsed contents of `data.json`.
-- `POST /api/metrics` — Requires authentication. Overwrites `data.json` with the supplied JSON body.
+- `GET /api/metrics` — Returns the stored dashboard payload from MongoDB Atlas.
+- `POST /api/metrics` — Requires authentication. Overwrites the stored dashboard payload with the supplied JSON body.
 
 To call the `POST` endpoint from the admin UI, sign in at `/admin` to obtain a bearer token. Example curl (replace `<TOKEN>`):
 
@@ -82,11 +92,11 @@ curl -X POST http://localhost:3001/api/metrics \
 
 **Troubleshooting & Notes**
 
-- If the server exits with an error instructing you to set `ADMIN_USERNAME` and `ADMIN_PASSWORD`, verify your `.env` file is present and correctly formatted.
+- If the server exits with an error instructing you to set `ADMIN_USERNAME`, `ADMIN_PASSWORD`, or `MONGODB_URI`, verify your `.env` file is present and correctly formatted.
 - If the chosen `PORT` is in use, the server will automatically try the next port and log a warning.
-- Ensure the process has read/write permissions for `data.json` since the server reads and overwrites it.
+- If Atlas rejects the connection, confirm your IP is on the Network Access list and the connection string uses the correct username, password, and cluster hostname.
 
 **Next steps**
 
-- Customize `data.json` to contain the dashboard metadata and values used by the UI.
+- Customize the document stored in MongoDB Atlas to contain the dashboard metadata and values used by the UI.
 - For production deployment, run behind a process manager (PM2/systemd) and/or a reverse proxy.

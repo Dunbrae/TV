@@ -2,16 +2,30 @@ import 'dotenv/config';
 import cors from 'cors';
 import express, { type Request, type Response } from 'express';
 import crypto from 'crypto';
-import { promises as fs } from 'fs';
+import { MongoClient, type Collection, type Document } from 'mongodb';
 import path from 'path';
 
 const app = express();
 const port = Number(process.env.PORT) || 3001;
-const dataFilePath = path.resolve(process.cwd(), 'data.json');
 const publicDir = path.resolve(process.cwd(), 'public');
 const adminUsername = process.env.ADMIN_USERNAME;
 const adminPassword = process.env.ADMIN_PASSWORD;
+const mongoUri = process.env.MONGODB_URI;
+const mongoDbName = process.env.MONGODB_DB || 'tv_display';
+const mongoCollectionName = process.env.MONGODB_COLLECTION || 'metrics';
+const metricsDocumentId = 'dashboard-metrics';
 const activeTokens = new Set<string>();
+const mongoClient = mongoUri ? new MongoClient(mongoUri) : null;
+
+type MetricsPayload = Record<string, unknown>;
+
+type MetricsDocument = Document & {
+  _id: string;
+  payload: MetricsPayload;
+  updatedAt: Date;
+};
+
+let metricsCollection: Collection<MetricsDocument> | null = null;
 
 app.use(cors());
 app.use(express.json());
@@ -32,6 +46,12 @@ app.get('/.well-known/appspecific/com.chrome.devtools.json', (_request: Request,
 function requireAuthConfig(): void {
   if (!adminUsername || !adminPassword) {
     throw new Error('Set ADMIN_USERNAME and ADMIN_PASSWORD in .env before starting the server.');
+  }
+}
+
+function requireMongoConfig(): void {
+  if (!mongoUri) {
+    throw new Error('Set MONGODB_URI in .env before starting the server.');
   }
 }
 
@@ -75,27 +95,52 @@ function requireAuth(request: Request, response: Response): boolean {
   return true;
 }
 
-async function ensureDataFile(): Promise<void> {
-  await fs.access(dataFilePath);
+async function getMetricsCollection(): Promise<Collection<MetricsDocument>> {
+  if (metricsCollection) {
+    return metricsCollection;
+  }
+
+  requireMongoConfig();
+
+  if (!mongoClient) {
+    throw new Error('MongoDB client is not configured.');
+  }
+
+  await mongoClient.connect();
+  metricsCollection = mongoClient.db(mongoDbName).collection<MetricsDocument>(mongoCollectionName);
+  return metricsCollection;
 }
 
 async function ensureAppConfiguration(): Promise<void> {
   requireAuthConfig();
+  requireMongoConfig();
 
   try {
-    await ensureDataFile();
+    await getMetricsCollection();
   } catch (error) {
-    throw new Error(`data.json is missing or unreadable: ${(error as Error).message}`);
+    throw new Error(`Failed to connect to MongoDB Atlas: ${(error as Error).message}`);
   }
 }
 
-async function readMetrics(): Promise<unknown> {
-  const raw = await fs.readFile(dataFilePath, 'utf8');
-  return JSON.parse(raw);
+async function readMetrics(): Promise<MetricsPayload> {
+  const collection = await getMetricsCollection();
+  const document = await collection.findOne({ _id: metricsDocumentId });
+  return document?.payload ?? {};
 }
 
-async function writeMetrics(payload: unknown): Promise<void> {
-  await fs.writeFile(dataFilePath, `${JSON.stringify(payload, null, 2)}\n`, 'utf8');
+async function writeMetrics(payload: MetricsPayload): Promise<void> {
+  const collection = await getMetricsCollection();
+
+  await collection.updateOne(
+    { _id: metricsDocumentId },
+    {
+      $set: {
+        payload,
+        updatedAt: new Date(),
+      },
+    },
+    { upsert: true },
+  );
 }
 
 app.get('/api/metrics', async (_request: Request, response: Response) => {
@@ -115,8 +160,13 @@ app.post('/api/metrics', async (request: Request, response: Response) => {
     return;
   }
 
+  if (!request.body || typeof request.body !== 'object' || Array.isArray(request.body)) {
+    response.status(400).json({ message: 'Expected a JSON object.' });
+    return;
+  }
+
   try {
-    await writeMetrics(request.body);
+    await writeMetrics(request.body as MetricsPayload);
     response.status(200).json({
       success: true,
     });
@@ -142,8 +192,8 @@ async function startServer(): Promise<void> {
 
   const listen = (currentPort: number): Promise<void> =>
     new Promise((resolve, reject) => {
-      const server = app.listen(currentPort, () => {
-        console.log(`TV dashboard API listening on http://localhost:${currentPort}`);
+      const server = app.listen(currentPort, '0.0.0.0', () => {
+        console.log(`TV dashboard API listening on http://0.0.0.0:${currentPort}`);
         resolve();
       });
 
