@@ -267,6 +267,7 @@ async function startServer(): Promise<void> {
 }
 
 export default app;
+module.exports = app;
 
 if (!isVercel && require.main === module) {
   startServer().catch((error) => {
