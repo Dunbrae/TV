@@ -4,6 +4,7 @@ import { getDatabase, ref, get, set } from 'https://www.gstatic.com/firebasejs/1
 const firebaseConfig = {
   apiKey: "AIzaSyD-JxB_5oXn0_mK_yoRl9SzuZxH_Qw0rSY",
   authDomain: "tv-display-dunbrae.firebaseapp.com",
+  databaseURL: "https://tv-display-dunbrae-default-rtdb.asia-southeast1.firebasedatabase.app/",
   projectId: "tv-display-dunbrae",
   storageBucket: "tv-display-dunbrae.firebasestorage.app",
   messagingSenderId: "21582548634",
