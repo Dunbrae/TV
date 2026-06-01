@@ -1,6 +1,18 @@
-const tokenKey = 'tv-display-admin-token';
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js';
+import { getDatabase, ref, get, set } from 'https://www.gstatic.com/firebasejs/10.9.0/firebase-database.js';
 
-let sessionToken = localStorage.getItem(tokenKey) || '';
+const firebaseConfig = {
+  apiKey: "AIzaSyD-JxB_5oXn0_mK_yoRl9SzuZxH_Qw0rSY",
+  authDomain: "tv-display-dunbrae.firebaseapp.com",
+  projectId: "tv-display-dunbrae",
+  storageBucket: "tv-display-dunbrae.firebasestorage.app",
+  messagingSenderId: "21582548634",
+  appId: "1:21582548634:web:463c8aa934e5991a59d923"
+};
+
+const firebaseApp = initializeApp(firebaseConfig);
+const database = getDatabase(firebaseApp);
+
 let currentData = null;
 
 const defaultWeeklyRow = {
@@ -64,10 +76,6 @@ function requireData() {
   if (!currentData) {
     throw new Error('No dashboard data loaded yet.');
   }
-}
-
-function getAuthHeaders() {
-  return sessionToken ? { Authorization: `Bearer ${sessionToken}` } : {};
 }
 
 function readNumber(input) {
@@ -347,49 +355,9 @@ function computeWeekRangeFromPicker(pickerValue) {
 }
 
 async function loadDashboard() {
-  const response = await fetch('/api/metrics', {
-    cache: 'no-store',
-    headers: getAuthHeaders(),
-  });
-
-  if (!response.ok) {
-    throw new Error(`Failed to load dashboard data (${response.status}).`);
-  }
-
-  currentData = await response.json();
+  const snapshot = await get(ref(database, 'metrics'));
+  currentData = snapshot.val() || {};
   populateForm(currentData);
-}
-
-async function login(event) {
-  event.preventDefault();
-
-  const username = document.getElementById('username').value.trim();
-  const password = document.getElementById('password').value;
-
-  showToast('Signing in...', 'info');
-
-  try {
-    const response = await fetch('/api/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password }),
-    });
-
-    if (!response.ok) {
-      throw new Error('Invalid username or password.');
-    }
-
-    const data = await response.json();
-    sessionToken = data.token;
-    localStorage.setItem(tokenKey, sessionToken);
-
-    document.getElementById('login-panel').classList.add('hidden');
-    document.getElementById('editor-panel').classList.remove('hidden');
-    showToast('Signed in successfully!', 'success');
-    await loadDashboard();
-  } catch (error) {
-    showToast(error.message || 'Login failed.', 'error');
-  }
 }
 
 async function saveChanges(event) {
@@ -399,18 +367,7 @@ async function saveChanges(event) {
 
   try {
     const payload = collectPayload();
-    const response = await fetch('/api/metrics', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...getAuthHeaders(),
-      },
-      body: JSON.stringify(payload),
-    });
-
-    if (!response.ok) {
-      throw new Error(`Save failed (${response.status}).`);
-    }
+    await set(ref(database, 'metrics'), payload);
 
     currentData = payload;
     const now = new Date();
@@ -420,25 +377,39 @@ async function saveChanges(event) {
   }
 }
 
+async function clearAllData() {
+  const isConfirmed = window.confirm('Are you sure you want to completely delete all data? This will instantly clear the TV display and cannot be undone.');
+  
+  if (!isConfirmed) {
+    return;
+  }
+
+  showToast('Clearing all data...', 'info');
+
+  try {
+    await set(ref(database, 'metrics'), null);
+    currentData = {};
+    populateForm({});
+    showToast('All data cleared successfully.', 'success');
+  } catch (error) {
+    showToast(error.message || 'Failed to clear data.', 'error');
+  }
+}
+
 function addRow() {
   const rows = readWeeklyRows();
   rows.push({ ...defaultWeeklyRow });
   renderWeeklyRows(rows);
 }
 
-function logout() {
-  sessionToken = '';
-  localStorage.removeItem(tokenKey);
-  document.getElementById('editor-panel').classList.add('hidden');
-  document.getElementById('login-panel').classList.remove('hidden');
-  showToast('Logged out.', 'success');
-}
-
 async function bootstrap() {
-  document.getElementById('login-form').addEventListener('submit', login);
   document.getElementById('editor-form').addEventListener('submit', saveChanges);
   document.getElementById('add-week-button').addEventListener('click', addRow);
-  document.getElementById('logout-button').addEventListener('click', logout);
+  
+  const clearButton = document.getElementById('clear-data-button');
+  if (clearButton) {
+    clearButton.addEventListener('click', clearAllData);
+  }
 
   const monthSelect = document.querySelector('[data-path="monthLabel"]');
   const monthCustom = document.querySelector('[data-path="monthLabelCustom"]');
@@ -482,20 +453,10 @@ async function bootstrap() {
     }
   });
 
-  if (!sessionToken) {
-    return;
-  }
-
   try {
-    document.getElementById('login-panel').classList.add('hidden');
-    document.getElementById('editor-panel').classList.remove('hidden');
     await loadDashboard();
   } catch (error) {
-    sessionToken = '';
-    localStorage.removeItem(tokenKey);
-    document.getElementById('login-panel').classList.remove('hidden');
-    document.getElementById('editor-panel').classList.add('hidden');
-    showToast('Session expired. Please sign in again.', 'error');
+    showToast('Failed to load initial data.', 'error');
   }
 }
 

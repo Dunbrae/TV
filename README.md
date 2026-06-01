@@ -1,20 +1,21 @@
-# TV Display Backend
+# TV Display Dashboard
 
-Lightweight Node.js + Express app that serves the TV dashboard and stores its content in MongoDB Atlas.
+A static, purely frontend TV dashboard and accompanying editor, hosted entirely on GitHub Pages. Data is stored and updated in real-time using Firebase Realtime Database.
 
-## Requirements
+## Overview
 
-- Node.js 18+ recommended
-- npm
+- **Static**: No Node.js server required. Runs directly in any web browser.
+- **Real-time**: Leverages Firebase WebSockets to instantly update the TV display the second changes are saved in the editor.
+- **Easy Hosting**: Simply upload these files to GitHub Pages and it works automatically.
 
-## Install
+## Files
 
-```bash
-npm install
-```
+- `index.html` & `app.js`: The main TV display dashboard.
+- `editor.html` & `editor.js`: The editor interface for updating metrics.
 
-## Development
+## Setup
 
+<<<<<<< Updated upstream
 ```bash
 npm run dev
 ```
@@ -59,3 +60,6 @@ The dashboard pulls its title, labels, ranges, and values from MongoDB Atlas. If
 Open `http://localhost:3001/admin` to sign in and edit the values.
 
 Set `ADMIN_USERNAME`, `ADMIN_PASSWORD`, and `MONGODB_URI` in the environment before launch, and add your IP to the Atlas Network Access list.
+=======
+See `setup.md` for instructions on how to configure your Firebase database and host on GitHub Pages.
+>>>>>>> Stashed changes

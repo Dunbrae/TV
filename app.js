@@ -1,3 +1,18 @@
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js';
+import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/10.9.0/firebase-database.js';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyD-JxB_5oXn0_mK_yoRl9SzuZxH_Qw0rSY",
+  authDomain: "tv-display-dunbrae.firebaseapp.com",
+  projectId: "tv-display-dunbrae",
+  storageBucket: "tv-display-dunbrae.firebasestorage.app",
+  messagingSenderId: "21582548634",
+  appId: "1:21582548634:web:463c8aa934e5991a59d923"
+};
+
+const firebaseApp = initializeApp(firebaseConfig);
+const database = getDatabase(firebaseApp);
+
 const currencyFormatter = new Intl.NumberFormat('en-US', {
   style: 'currency',
   currency: 'USD',
@@ -326,24 +341,23 @@ function render(data) {
     .join('');
 }
 
-async function loadData() {
-  try {
-    const response = await fetch('/api/metrics', { cache: 'no-store' });
-
-    if (!response.ok) {
-      throw new Error(`Request failed with ${response.status}`);
+function loadData() {
+  const metricsRef = ref(database, 'metrics');
+  onValue(metricsRef, (snapshot) => {
+    try {
+      const data = snapshot.val() || {};
+      render(data);
+    } catch (error) {
+      console.error('Failed to parse dashboard data:', error);
+      setText('mode-status', 'Dashboard data error');
     }
-
-    const data = await response.json();
-    render(data);
-  } catch (error) {
+  }, (error) => {
     console.error('Failed to load dashboard data:', error);
     setText('mode-status', 'Dashboard data unavailable');
-  }
+  });
 }
 
 modeToggleButton.addEventListener('click', toggleCarouselMode);
 applyCarouselState();
 startCarouselTimer();
 loadData();
-setInterval(loadData, 10000);
