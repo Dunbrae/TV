@@ -129,6 +129,7 @@ function clearDashboardValues() {
   [
     'page-title',
     'month-range',
+    'month-as-of',
     'week-title',
     'week-range',
     'month-invoiced',
@@ -261,6 +262,15 @@ function render(data) {
 
   setText('page-title', data.dashboardTitle || 'Dashboard');
   setText('month-range', data.monthRange || '');
+  // Compute 'As of' date for month badge: prefer end of monthRange if present
+  let asOfString = '';
+  if (data.monthRange && typeof data.monthRange === 'string' && data.monthRange.includes('-')) {
+    const parts = data.monthRange.split('-');
+    asOfString = parts[1] ? parts[1].trim() : parts[0].trim();
+  }
+  const asOfDate = asOfString ? new Date(asOfString) : new Date();
+  const formattedAsOf = formatHumanDate(asOfDate);
+  setText('month-as-of', formattedAsOf);
   setText('week-title', normalizeWeekTitle(data.weekTitle) || 'Weekly Summary');
   setText('week-range', data.weekRange || '');
 
@@ -275,6 +285,16 @@ function render(data) {
   setDonut('week-donut-ring', weekPercent);
 
   setText('month-donut-label', data.monthLabel || 'Month');
+}
+
+function formatHumanDate(d) {
+  try {
+    const date = new Date(d);
+    if (Number.isNaN(date.getTime())) return '';
+    return date.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+  } catch (e) {
+    return '';
+  }
 }
 
 function loadData() {
