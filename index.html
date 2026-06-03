@@ -58,9 +58,6 @@
     <header class="mx-auto w-[min(1760px,94vw)] pt-8 px-4">
       <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6 pb-6 border-b border-slate-200">
         <div class="space-y-3">
-          <div class="inline-flex items-center gap-2 bg-emerald-500/10 text-emerald-700 border border-emerald-500/20 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider animate-pulse-subtle">
-            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_#34d399]"></span> Live Performance Board
-          </div>
           <h1 id="page-title" class="text-5xl md:text-6xl lg:text-7xl font-black uppercase tracking-tight text-slate-900 drop-shadow-[0_4px_12px_rgba(99,102,241,0.04)] leading-none">
             <!-- Rendered by JS -->
             <span class="inline-block w-64 h-14 bg-slate-200 animate-pulse rounded-lg"></span>
@@ -108,19 +105,19 @@
 
       <!-- Empty State Panel -->
       <section id="empty-state" class="hidden">
-        <article class="mx-auto max-w-2xl overflow-hidden rounded-[32px] bg-white border border-slate-200 p-12 text-center shadow-xl shadow-slate-100">
-          <div class="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-indigo-50 text-indigo-650 mb-6 border border-indigo-100">
-            <svg class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+        <article class="mx-auto max-w-4xl overflow-hidden rounded-[40px] bg-white border border-slate-200 p-16 md:p-20 text-center shadow-2xl shadow-slate-100">
+          <div class="inline-flex items-center justify-center w-28 h-28 rounded-3xl bg-indigo-50 text-indigo-650 mb-8 border border-indigo-100">
+            <svg class="w-14 h-14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
               <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
             </svg>
           </div>
-          <p class="text-xs uppercase tracking-widest text-indigo-750 font-extrabold mb-2">Setup Required</p>
-          <h2 class="text-4xl font-black text-slate-900">Dashboard is Empty</h2>
-          <p class="mt-4 text-slate-500 leading-relaxed max-w-md mx-auto text-base">The metrics storage is ready but has no configured values yet. Open the editor and submit target values to populate this board.</p>
-          <div class="mt-8">
-            <a href="./editor.html" class="inline-flex items-center gap-2 px-8 py-4 rounded-2xl bg-indigo-600 hover:bg-indigo-500 font-extrabold text-white transition-all shadow-lg shadow-indigo-600/30 active:scale-95 text-base">
+          <p class="text-sm md:text-base uppercase tracking-[0.35em] text-indigo-750 font-extrabold mb-4">Setup Required</p>
+          <h2 class="text-5xl md:text-6xl font-black text-slate-900 leading-tight">Dashboard is Empty</h2>
+          <p class="mt-6 text-slate-500 leading-relaxed max-w-2xl mx-auto text-lg md:text-xl">The metrics storage is ready but has no configured values yet. Open the editor and submit target values to populate this board.</p>
+          <div class="mt-10">
+            <a href="./editor.html" class="inline-flex items-center gap-3 px-10 py-5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 font-extrabold text-white transition-all shadow-lg shadow-indigo-600/30 active:scale-95 text-xl">
               Configure Metrics
-              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
               </svg>
             </a>
@@ -140,7 +137,7 @@
                   <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
               </div>
-              <h2 class="m-0 text-2xl font-black uppercase tracking-wider text-slate-800">Month Overview</h2>
+              <h2 class="m-0 text-2xl font-black uppercase tracking-wider text-slate-800">Overview</h2>
             </div>
             <span class="text-right text-base font-extrabold text-indigo-755 bg-indigo-50 border border-indigo-100 px-6 py-2.5 rounded-full whitespace-nowrap" id="month-range">Loading...</span>
           </div>
@@ -148,11 +145,11 @@
           <div class="grid items-center gap-8 px-12 py-10 md:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
             <div class="grid gap-6">
               <div class="bg-slate-50 border border-slate-150 rounded-2xl p-7">
-                <span class="text-xs font-bold uppercase tracking-widest text-slate-500">Month Invoiced</span>
+                <span class="inline-block bg-yellow-300 px-2 py-1 text-2xl font-black uppercase tracking-widest text-slate-900 shadow-[0_0_0_3px_rgba(253,224,71,0.35)]">Month Invoiced</span>
                 <strong class="block text-6xl md:text-7xl lg:text-8xl font-black tracking-tight text-slate-900 mt-2" id="month-invoiced">$0</strong>
               </div>
               <div class="bg-slate-50 border border-slate-150 rounded-2xl p-7">
-                <span class="text-xs font-bold uppercase tracking-widest text-slate-500">Target</span>
+                <span class="inline-block bg-yellow-300 px-2 py-1 text-2xl font-black uppercase tracking-widest text-slate-900 shadow-[0_0_0_3px_rgba(253,224,71,0.35)]">Target</span>
                 <strong class="block text-6xl md:text-7xl lg:text-8xl font-black tracking-tight text-slate-700 mt-2" id="month-target">$0</strong>
               </div>
             </div>
@@ -202,11 +199,11 @@
           <div class="grid items-center gap-8 px-12 py-10 md:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
             <div class="grid gap-6">
               <div class="bg-slate-50 border border-slate-150 rounded-2xl p-7">
-                <span class="text-xs font-bold uppercase tracking-widest text-slate-500">Week Invoiced</span>
+                <span class="inline-block bg-yellow-300 px-2 py-1 text-2xl font-black uppercase tracking-widest text-slate-900 shadow-[0_0_0_3px_rgba(253,224,71,0.35)]">Week Invoiced</span>
                 <strong class="block text-6xl md:text-7xl lg:text-8xl font-black tracking-tight text-slate-900 mt-2" id="week-invoiced">$0</strong>
               </div>
               <div class="bg-slate-50 border border-slate-150 rounded-2xl p-7">
-                <span class="text-xs font-bold uppercase tracking-widest text-slate-500">Week Target</span>
+                <span class="inline-block bg-yellow-300 px-2 py-1 text-2xl font-black uppercase tracking-widest text-slate-900 shadow-[0_0_0_3px_rgba(253,224,71,0.35)]">Week Target</span>
                 <strong class="block text-6xl md:text-7xl lg:text-8xl font-black tracking-tight text-slate-700 mt-2" id="week-target">$0</strong>
               </div>
             </div>
@@ -240,93 +237,7 @@
         </article>
       </section>
 
-      <!-- Weekly Section Table Card -->
-      <section data-carousel-card="table" class="carousel-transition card-visible mt-8 overflow-hidden rounded-[32px] bg-white border border-slate-200/85 shadow-xl hover:border-slate-300 hover:shadow-indigo-500/5 transition-all duration-300 hidden">
-        <div class="flex items-center justify-between gap-4 border-b border-slate-100 px-10 py-7 flex-col sm:flex-row sm:items-center">
-          <div class="flex items-center gap-3">
-            <div class="w-12 h-12 rounded-xl bg-violet-50 flex items-center justify-center text-violet-700 border border-violet-100">
-              <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-              </svg>
-            </div>
-            <h2 id="weekly-section-title" class="m-0 text-2xl font-black uppercase tracking-wider text-slate-800">Weekly Breakdown</h2>
-          </div>
-          <span class="text-right text-base font-extrabold text-violet-755 bg-violet-50 border border-violet-100 px-6 py-2.5 rounded-full whitespace-nowrap" id="daily-target">Daily Target: $0</span>
-        </div>
 
-        <!-- Metric Mini Cards Grid -->
-        <div class="mx-10 mt-8 grid grid-cols-2 lg:grid-cols-5 gap-5">
-          <!-- Week's % -->
-          <div class="bg-slate-50 border border-slate-150 rounded-2xl p-6 flex flex-col justify-between min-h-[120px]">
-            <div class="flex items-center justify-between gap-2">
-              <span class="text-xs font-bold uppercase tracking-wider text-slate-550">Week %</span>
-              <svg class="w-5 h-5 text-indigo-550" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-              </svg>
-            </div>
-            <strong class="text-3xl font-black text-slate-900 mt-2 block leading-none" id="weeks-percent">0%</strong>
-          </div>
-          <!-- MTD % -->
-          <div class="bg-slate-50 border border-slate-150 rounded-2xl p-6 flex flex-col justify-between min-h-[120px]">
-            <div class="flex items-center justify-between gap-2">
-              <span class="text-xs font-bold uppercase tracking-wider text-slate-550">MTD %</span>
-              <svg class="w-5 h-5 text-indigo-550" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2z" />
-              </svg>
-            </div>
-            <strong class="text-3xl font-black text-slate-900 mt-2 block leading-none" id="mtd-percent">0%</strong>
-          </div>
-          <!-- MTD Invoiced -->
-          <div class="bg-gradient-to-br from-indigo-50 to-purple-50 border border-indigo-100 rounded-2xl p-6 flex flex-col justify-between min-h-[120px]">
-            <div class="flex items-center justify-between gap-2">
-              <span class="text-xs font-bold uppercase tracking-wider text-indigo-750">MTD Invoiced</span>
-              <svg class="w-5 h-5 text-indigo-650" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <strong class="text-3xl font-black text-indigo-700 mt-2 block leading-none" id="mtd-invoiced">$0</strong>
-          </div>
-          <!-- Target -->
-          <div class="bg-slate-50 border border-slate-150 rounded-2xl p-6 flex flex-col justify-between min-h-[120px]">
-            <div class="flex items-center justify-between gap-2">
-              <span class="text-xs font-bold uppercase tracking-wider text-slate-550">Total Target</span>
-              <svg class="w-5 h-5 text-emerald-650" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <strong class="text-3xl font-black text-slate-800 mt-2 block leading-none" id="mtd-target">$0</strong>
-          </div>
-          <!-- Daily Target -->
-          <div class="bg-slate-50 border border-slate-150 rounded-2xl p-6 flex flex-col justify-between min-h-[120px]">
-            <div class="flex items-center justify-between gap-2">
-              <span class="text-xs font-bold uppercase tracking-wider text-slate-555">Daily Target</span>
-              <svg class="w-5 h-5 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <strong class="text-3xl font-black text-rose-600 mt-2 block leading-none" id="daily-target-value">$0</strong>
-          </div>
-        </div>
-
-        <!-- Table -->
-        <div class="overflow-x-auto px-10 pb-10 pt-8">
-          <table class="min-w-[960px] w-full border-collapse font-sans">
-            <thead>
-              <tr class="border-b border-slate-200 text-left text-xs font-bold uppercase tracking-widest text-indigo-650">
-                <th class="pb-4 pt-2 px-6">Week</th>
-                <th class="pb-4 pt-2 px-6">Start of Week</th>
-                <th class="pb-4 pt-2 px-6">End of Week</th>
-                <th class="pb-4 pt-2 px-6 text-right">Week Target</th>
-                <th class="pb-4 pt-2 px-6 text-right">Week Invoiced</th>
-                <th class="pb-4 pt-2 px-6 text-right">Week's %</th>
-              </tr>
-            </thead>
-            <tbody id="weekly-table" class="divide-y divide-slate-100 text-base font-semibold text-slate-700">
-              <!-- Rendered by JS -->
-            </tbody>
-          </table>
-        </div>
-      </section>
 
     </main>
 

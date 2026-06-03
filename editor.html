@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap"
     rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
       theme: {
@@ -20,7 +21,6 @@
       },
     };
   </script>
-  <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
 <body
@@ -28,7 +28,7 @@
 
   <!-- Toast Notification -->
   <div id="toast"
-    class="fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-2xl bg-slate-900 px-5 py-4 text-sm font-bold text-white shadow-2xl transition-all duration-300 translate-y-12 opacity-0 pointer-events-none">
+    class="fixed bottom-8 right-8 z-50 flex items-center gap-3 rounded-3xl bg-slate-900 px-6 py-5 text-base font-bold text-white shadow-2xl transition-all duration-300 translate-y-12 opacity-0 pointer-events-none">
     <span id="toast-icon" class="text-indigo-400"></span>
     <span id="toast-message"></span>
   </div>
@@ -38,64 +38,57 @@
 
     <!-- Top Sticky Navigation Bar -->
     <nav
-      class="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-slate-100 py-4 px-6 md:px-12 flex items-center justify-between shadow-[0_1px_3px_rgba(0,0,0,0.02)] transition-colors duration-300">
-      <div class="flex items-center gap-3">
-        <span class="w-2.5 h-2.5 rounded-full bg-indigo-600 shadow-[0_0_6px_#4f46e5]"></span>
-        <h2 class="text-lg font-black tracking-tight uppercase text-slate-900">Performance Editor</h2>
-      </div>
-      <div class="flex items-center gap-3">
-        <a class="hidden sm:inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 font-bold text-slate-600 text-xs hover:bg-slate-50 hover:text-slate-800 transition-colors whitespace-nowrap"
-          href="./index.html">
-          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-            <path stroke-linecap="round" stroke-linejoin="round"
-              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-          </svg>
-          Live Board
-        </a>
-      </div>
+      class="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-slate-100 py-4 px-4 sm:px-6 md:px-16 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 shadow-[0_1px_3px_rgba(0,0,0,0.02)] transition-colors duration-300">
+      <a class="inline-flex items-center justify-center gap-3 rounded-3xl bg-indigo-600 hover:bg-indigo-500 px-6 py-4 font-extrabold text-white transition-all shadow-lg shadow-indigo-600/30 active:scale-95 text-base w-full sm:w-auto"
+        href="./index.html">
+        <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+        </svg>
+        Live Board
+      </a>
     </nav>
 
     <!-- Editor Content Form -->
-    <form id="editor-form" class="mx-auto max-w-7xl mt-8 px-6 md:px-12 space-y-8">
+    <form id="editor-form" class="mx-auto w-[min(1600px,94vw)] mt-6 sm:mt-8 px-4 sm:px-6 md:px-16 space-y-8 sm:space-y-10">
 
       <!-- ROW 1: Configuration Header -->
       <div
-        class="bg-gradient-to-r from-slate-900 to-indigo-950 rounded-[32px] p-8 text-white space-y-3 shadow-xl shadow-slate-950/10 border border-white/5">
-        <p class="text-xs uppercase tracking-widest text-indigo-300 font-extrabold">Data Storage Config</p>
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div class="space-y-1">
-            <h3 class="text-2xl font-black uppercase tracking-tight" id="dashboardTitleDisplay">Target for the month of
+        class="bg-gradient-to-r from-slate-900 to-indigo-950 rounded-[32px] sm:rounded-[40px] p-6 sm:p-8 md:p-12 text-white space-y-4 shadow-xl shadow-slate-950/10 border border-white/5">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 sm:gap-6">
+          <div class="space-y-2">
+            <h3 class="text-2xl sm:text-3xl md:text-4xl font-black uppercase tracking-tight leading-tight" id="dashboardTitleDisplay">Target for the month of
               —</h3>
             <input data-path="dashboardTitle" type="hidden" />
-            <p class="text-xs text-slate-400">Dashboard title is automatically inferred from selected date ranges and
+            <p class="text-xs sm:text-sm md:text-base text-slate-400">Dashboard title is automatically inferred from selected date ranges and
               labels below.</p>
           </div>
         </div>
       </div>
 
       <!-- ROW 2: Configuration Cards -->
-      <div class="grid gap-6 md:grid-cols-3">
+      <div class="grid gap-6 md:grid-cols-2">
 
         <!-- Card 1: Calendar & Timeline Scope -->
         <div
-          class="bg-white rounded-3xl border border-slate-100 shadow-[0_4px_12px_-4px_rgba(0,0,0,0.03)] p-6 space-y-5">
-          <div class="flex items-center gap-2 border-b border-slate-50 pb-3">
+          class="bg-white rounded-[32px] sm:rounded-[40px] border border-slate-100 shadow-[0_4px_12px_-4px_rgba(0,0,0,0.03)] p-5 sm:p-8 md:p-10 space-y-5 sm:space-y-6 h-full">
+          <div class="flex items-center gap-3 border-b border-slate-50 pb-4">
             <div
-              class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-100">
-              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-100">
+              <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round"
                   d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
             </div>
-            <h4 class="text-sm font-extrabold uppercase text-slate-800">Timeline & Month</h4>
+            <h4 class="text-sm sm:text-base md:text-lg font-extrabold uppercase text-slate-800">Timeline & Month</h4>
           </div>
 
-          <div class="space-y-4">
+          <div class="space-y-4 sm:space-y-5">
             <div class="space-y-1.5">
-              <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Month label</span>
+              <span class="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-500">Target Month</span>
               <select data-path="monthLabel"
-                class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 font-semibold text-slate-800 outline-none transition-all focus:bg-white focus:border-indigo-500">
+                class="w-full rounded-2xl border border-slate-200 bg-slate-50/50 px-4 sm:px-5 py-3.5 sm:py-4 text-sm sm:text-base font-semibold text-slate-800 outline-none transition-all focus:bg-white focus:border-indigo-500">
                 <option value="">(none)</option>
                 <option>January</option>
                 <option>February</option>
@@ -109,19 +102,16 @@
                 <option>October</option>
                 <option>November</option>
                 <option>December</option>
-                <option value="__custom">Custom…</option>
               </select>
-              <input data-path="monthLabelCustom" placeholder="Enter custom label"
-                class="hidden w-full mt-2 rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 font-semibold text-slate-800 outline-none transition-all focus:bg-white focus:border-indigo-500" />
             </div>
 
             <div class="space-y-1.5">
-              <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Month Date Range</span>
-              <div class="grid grid-cols-2 gap-2">
-                <input data-path="monthStart" type="date" aria-label="Month range start date"
-                  class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2.5 text-xs font-semibold text-slate-800 outline-none focus:bg-white focus:border-indigo-500" />
-                <input data-path="monthEnd" type="date" aria-label="Month range end date"
-                  class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2.5 text-xs font-semibold text-slate-800 outline-none focus:bg-white focus:border-indigo-500" />
+              <span class="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-500">Month Date Range</span>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <input data-path="monthStart" type="date" aria-label="Month range start date" placeholder="Start date"
+                  class="w-full rounded-2xl border border-slate-200 bg-slate-50/50 px-4 py-3.5 text-sm sm:text-base font-semibold text-slate-800 outline-none focus:bg-white focus:border-indigo-500" />
+                <input data-path="monthEnd" type="date" aria-label="Month range end date" placeholder="End date"
+                  class="w-full rounded-2xl border border-slate-200 bg-slate-50/50 px-4 py-3.5 text-sm sm:text-base font-semibold text-slate-800 outline-none focus:bg-white focus:border-indigo-500" />
               </div>
             </div>
           </div>
@@ -129,67 +119,39 @@
 
         <!-- Card 2: Weekly Timeline Scope -->
         <div
-          class="bg-white rounded-3xl border border-slate-100 shadow-[0_4px_12px_-4px_rgba(0,0,0,0.03)] p-6 space-y-5">
-          <div class="flex items-center gap-2 border-b border-slate-50 pb-3">
+          class="bg-white rounded-[32px] sm:rounded-[40px] border border-slate-100 shadow-[0_4px_12px_-4px_rgba(0,0,0,0.03)] p-5 sm:p-8 md:p-10 space-y-5 sm:space-y-6 h-full">
+          <div class="flex items-center gap-3 border-b border-slate-50 pb-4">
             <div
-              class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100">
-              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100">
+              <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <h4 class="text-sm font-extrabold uppercase text-slate-800">Weekly Settings</h4>
+            <h4 class="text-sm sm:text-base md:text-lg font-extrabold uppercase text-slate-800">Weekly Settings</h4>
           </div>
 
-          <div class="space-y-4">
+          <div class="space-y-4 sm:space-y-5">
             <div class="space-y-1.5">
-              <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Week selector (ISO week)</span>
-              <input data-path="weekPicker" type="week" aria-label="Select ISO week"
-                class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 font-semibold text-slate-800 outline-none transition-all focus:bg-white focus:border-indigo-500" />
+              <span class="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-500">Week Date</span>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <input data-path="weekStart" type="date" aria-label="Week start" placeholder="Monday"
+                  class="w-full rounded-2xl border border-slate-200 bg-slate-50/50 px-4 py-3.5 text-sm sm:text-base font-semibold text-slate-800 outline-none focus:bg-white focus:border-indigo-500" />
+                <input data-path="weekEnd" type="date" aria-label="Week end" placeholder="Sunday"
+                  class="w-full rounded-2xl border border-slate-200 bg-slate-50/50 px-4 py-3.5 text-sm sm:text-base font-semibold text-slate-800 outline-none focus:bg-white focus:border-indigo-500" />
+              </div>
             </div>
 
-            <div class="space-y-1.5">
-              <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Week title label</span>
-              <input data-path="weekTitle" type="text" placeholder="e.g. Target for Week 21"
-                class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 font-semibold text-slate-800 outline-none transition-all focus:bg-white focus:border-indigo-500" />
+            <div class="rounded-2xl bg-slate-50 border border-slate-100 px-5 py-4 text-center">
+              <p id="fiscal-week-number" class="text-xl sm:text-2xl font-black text-emerald-700"></p>
             </div>
 
-            <div class="space-y-1.5">
-              <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Week Range (Auto-Updates)</span>
-              <input data-path="weekRangeDisplay" readonly placeholder="Week range"
-                class="w-full rounded-xl border border-slate-100 bg-slate-100 px-4 py-3 font-semibold text-slate-500 cursor-not-allowed outline-none" />
-            </div>
 
-            <div class="space-y-1.5">
-              <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Week Identifier Label</span>
-              <input data-path="weekLabel" type="text" placeholder="e.g. Week 21"
-                class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 font-semibold text-slate-800 outline-none transition-all focus:bg-white focus:border-indigo-500" />
-            </div>
+
+
+
           </div>
         </div>
 
-        <!-- Card 3: Dashboard Layout Titles -->
-        <div
-          class="bg-white rounded-3xl border border-slate-100 shadow-[0_4px_12px_-4px_rgba(0,0,0,0.03)] p-6 space-y-5">
-          <div class="flex items-center gap-2 border-b border-slate-50 pb-3">
-            <div
-              class="w-8 h-8 rounded-lg bg-violet-50 text-violet-600 flex items-center justify-center border border-violet-100">
-              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-              </svg>
-            </div>
-            <h4 class="text-sm font-extrabold uppercase text-slate-800">Layout Section Titles</h4>
-          </div>
-
-          <div class="space-y-4">
-            <div class="space-y-1.5">
-              <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Weekly Breakdown section
-                title</span>
-              <input data-path="weeklySectionTitle" type="text" placeholder="e.g. Weekly Breakdown"
-                class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 font-semibold text-slate-800 outline-none transition-all focus:bg-white focus:border-indigo-500" />
-            </div>
-          </div>
-        </div>
       </div>
 
       <!-- ROW 3: Financial Figures Cards -->
@@ -197,156 +159,97 @@
 
         <!-- Month Goals Card -->
         <div
-          class="bg-white rounded-3xl border border-slate-100 shadow-[0_4px_12px_-4px_rgba(0,0,0,0.03)] p-6 space-y-5">
-          <div class="flex items-center gap-2 border-b border-slate-50 pb-3">
+          class="bg-white rounded-[32px] sm:rounded-[40px] border border-slate-100 shadow-[0_4px_12px_-4px_rgba(0,0,0,0.03)] p-5 sm:p-8 md:p-10 space-y-5 sm:space-y-6 h-full">
+          <div class="flex items-center gap-3 border-b border-slate-50 pb-4">
             <div
-              class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-100">
-              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-100">
+              <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round"
                   d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <h4 class="text-sm font-extrabold uppercase text-slate-800">Monthly Targets</h4>
+            <h4 class="text-sm sm:text-base md:text-lg font-extrabold uppercase text-slate-800">Monthly Targets</h4>
           </div>
 
-          <div class="grid gap-4 sm:grid-cols-2">
+          <div class="grid gap-4 sm:gap-5 sm:grid-cols-2">
             <div class="space-y-1.5">
-              <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Month Invoiced ($)</span>
-              <input data-path="monthInvoiced" type="number" step="0.01" placeholder="e.g. 85000"
-                class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 font-semibold text-slate-800 outline-none transition-all focus:bg-white focus:border-indigo-500" />
+              <span class="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-500">Month Invoiced ($)</span>
+              <input data-path="monthInvoiced" type="text" inputmode="numeric" placeholder="e.g. "
+                class="w-full rounded-2xl border border-slate-200 bg-slate-50/50 px-4 sm:px-5 py-3.5 sm:py-4 text-sm sm:text-base font-semibold text-slate-800 outline-none transition-all focus:bg-white focus:border-indigo-500" />
             </div>
             <div class="space-y-1.5">
-              <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Month Target ($)</span>
-              <input data-path="monthTarget" type="number" step="0.01" placeholder="e.g. 120000"
-                class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 font-semibold text-slate-800 outline-none transition-all focus:bg-white focus:border-indigo-500" />
-            </div>
-            <div class="space-y-1.5">
-              <span class="text-xs font-bold uppercase tracking-wider text-slate-500">MTD Invoiced ($)</span>
-              <input data-path="mtdInvoiced" type="number" step="0.01" placeholder="e.g. 85000"
-                class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 font-semibold text-slate-800 outline-none transition-all focus:bg-white focus:border-indigo-500" />
-            </div>
-            <div class="space-y-1.5">
-              <span class="text-xs font-bold uppercase tracking-wider text-slate-500">MTD Target ($)</span>
-              <input data-path="target" type="number" step="0.01" placeholder="e.g. 120000"
-                class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 font-semibold text-slate-800 outline-none transition-all focus:bg-white focus:border-indigo-500" />
+              <span class="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-500">Month Target ($)</span>
+              <input data-path="monthTarget" type="text" inputmode="numeric" placeholder="e.g. 8,600,000"
+                class="w-full rounded-2xl border border-slate-200 bg-slate-50/50 px-4 sm:px-5 py-3.5 sm:py-4 text-sm sm:text-base font-semibold text-slate-800 outline-none transition-all focus:bg-white focus:border-indigo-500" />
             </div>
             <div class="space-y-1.5 sm:col-span-2">
-              <span class="text-xs font-bold uppercase tracking-wider text-slate-500">MTD %</span>
-              <input data-path="mtdPercent" type="number" step="1" placeholder="e.g. 71"
-                class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 font-semibold text-slate-800 outline-none transition-all focus:bg-white focus:border-indigo-500" />
+              <span class="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-500">MTD %</span>
+              <input data-path="mtdPercent" type="number" step="1" placeholder="e.g. 73"
+                class="w-full rounded-2xl border border-slate-200 bg-slate-50/50 px-4 sm:px-5 py-3.5 sm:py-4 text-sm sm:text-base font-semibold text-slate-800 outline-none transition-all focus:bg-white focus:border-indigo-500" />
             </div>
           </div>
         </div>
 
         <!-- Week Goals Card -->
         <div
-          class="bg-white rounded-3xl border border-slate-100 shadow-[0_4px_12px_-4px_rgba(0,0,0,0.03)] p-6 space-y-5">
-          <div class="flex items-center gap-2 border-b border-slate-50 pb-3">
+          class="bg-white rounded-[32px] sm:rounded-[40px] border border-slate-100 shadow-[0_4px_12px_-4px_rgba(0,0,0,0.03)] p-5 sm:p-8 md:p-10 space-y-5 sm:space-y-6 h-full">
+          <div class="flex items-center gap-3 border-b border-slate-50 pb-4">
             <div
-              class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100">
-              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100">
+              <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round"
                   d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
               </svg>
             </div>
-            <h4 class="text-sm font-extrabold uppercase text-slate-800">Weekly & Daily Targets</h4>
+            <h4 class="text-sm sm:text-base md:text-lg font-extrabold uppercase text-slate-800">Weekly Targets</h4>
           </div>
 
-          <div class="grid gap-4 sm:grid-cols-2">
+          <div class="grid gap-4 sm:gap-5 sm:grid-cols-2">
             <div class="space-y-1.5">
-              <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Week Invoiced ($)</span>
-              <input data-path="weekInvoiced" type="number" step="0.01" placeholder="e.g. 24000"
-                class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 font-semibold text-slate-800 outline-none transition-all focus:bg-white focus:border-indigo-500" />
+              <span class="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-500">Week Invoiced ($)</span>
+              <input data-path="weekInvoiced" type="text" inputmode="numeric" placeholder="e.g. 1,000,000"
+                class="w-full rounded-2xl border border-slate-200 bg-slate-50/50 px-4 sm:px-5 py-3.5 sm:py-4 text-sm sm:text-base font-semibold text-slate-800 outline-none transition-all focus:bg-white focus:border-indigo-500" />
             </div>
             <div class="space-y-1.5">
-              <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Week Target ($)</span>
-              <input data-path="weekTarget" type="number" step="0.01" placeholder="e.g. 30000"
-                class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 font-semibold text-slate-800 outline-none transition-all focus:bg-white focus:border-indigo-500" />
+              <span class="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-500">Week Target ($)</span>
+              <input data-path="weekTarget" type="text" inputmode="numeric" placeholder="e.g. 2,000,000"
+                class="w-full rounded-2xl border border-slate-200 bg-slate-50/50 px-4 sm:px-5 py-3.5 sm:py-4 text-sm sm:text-base font-semibold text-slate-800 outline-none transition-all focus:bg-white focus:border-indigo-500" />
             </div>
+
             <div class="space-y-1.5">
-              <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Daily Target ($)</span>
-              <input data-path="dailyTarget" type="number" step="0.01" placeholder="e.g. 4000"
-                class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 font-semibold text-slate-800 outline-none transition-all focus:bg-white focus:border-indigo-500" />
-            </div>
-            <div class="space-y-1.5">
-              <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Week's %</span>
-              <input data-path="weeksPercent" type="number" step="1" placeholder="e.g. 80"
-                class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 font-semibold text-slate-800 outline-none transition-all focus:bg-white focus:border-indigo-500" />
+              <span class="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-500">Week's %</span>
+              <input data-path="weeksPercent" type="number" step="1" placeholder="e.g. 50"
+                class="w-full rounded-2xl border border-slate-200 bg-slate-50/50 px-4 sm:px-5 py-3.5 sm:py-4 text-sm sm:text-base font-semibold text-slate-800 outline-none transition-all focus:bg-white focus:border-indigo-500" />
             </div>
           </div>
-        </div>
-      </div>
-
-      <!-- ROW 4: Weekly Breakdown Rows Editor -->
-      <div class="bg-white rounded-3xl border border-slate-100 shadow-[0_4px_12px_-4px_rgba(0,0,0,0.03)] p-6 space-y-6">
-        <div class="flex items-center justify-between gap-4 border-b border-slate-50 pb-3 flex-wrap">
-          <div class="flex items-center gap-2">
-            <div
-              class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-650 flex items-center justify-center border border-indigo-100">
-              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-              </svg>
-            </div>
-            <h4 class="text-sm font-extrabold uppercase text-slate-800">Weekly Data Rows</h4>
-          </div>
-
-          <button type="button" id="add-week-button"
-            class="inline-flex items-center gap-1.5 rounded-xl bg-indigo-50 border border-indigo-100 px-4 py-2.5 font-bold text-indigo-705 text-xs hover:bg-indigo-100 hover:text-indigo-800 transition-colors">
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-            </svg>
-            Add Weekly Row
-          </button>
-        </div>
-
-        <!-- Table Container -->
-        <div class="overflow-x-auto border border-slate-100 rounded-2xl">
-          <table class="w-full border-collapse">
-            <thead>
-              <tr
-                class="bg-slate-50/75 border-b border-slate-100 text-left text-xs font-bold uppercase tracking-wider text-slate-500">
-                <th class="px-4 py-3.5">Week Identifier</th>
-                <th class="px-4 py-3.5">Start Date</th>
-                <th class="px-4 py-3.5">End Date</th>
-                <th class="px-4 py-3.5">Target ($)</th>
-                <th class="px-4 py-3.5">Invoiced ($)</th>
-                <th class="px-4 py-3.5">Percent (%)</th>
-                <th class="px-4 py-3.5 text-center">Actions</th>
-              </tr>
-            </thead>
-            <tbody id="weekly-editor" class="divide-y divide-slate-100">
-              <!-- Appended dynamically by JS -->
-            </tbody>
-          </table>
         </div>
       </div>
 
       <!-- Footer Actions Bar -->
       <div
-        class="flex items-center justify-between gap-4 p-6 bg-slate-50 rounded-3xl border border-slate-100 flex-wrap">
-        <div class="flex items-center gap-1.5 text-slate-450 font-semibold text-xs">
-          <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5 p-5 sm:p-8 md:p-10 bg-slate-50 rounded-[32px] sm:rounded-[40px] border border-slate-100 flex-wrap">
+        <div class="flex items-center gap-2 text-slate-450 font-semibold text-xs sm:text-sm md:text-base">
+          <svg class="w-4 h-4 sm:w-5 sm:h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round"
               d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           Keyboard shortcut: Press <kbd
-            class="px-1.5 py-0.5 rounded border border-slate-300 bg-white shadow-sm font-sans font-bold text-slate-750">Ctrl/Cmd
+            class="px-2 py-1 rounded-lg border border-slate-300 bg-white shadow-sm font-sans font-bold text-slate-750 whitespace-nowrap">Ctrl/Cmd
             + S</kbd> to save.
         </div>
 
-        <div class="flex items-center gap-4">
+        <div class="grid w-full gap-4 sm:grid-cols-2 lg:w-auto lg:flex lg:items-center lg:gap-5">
           <button type="button" id="clear-data-button"
-            class="inline-flex items-center gap-2 rounded-2xl bg-rose-50 border border-rose-100 hover:bg-rose-100 hover:border-rose-200 px-6 py-4 font-bold text-rose-600 transition-all text-sm">
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            class="inline-flex items-center justify-center gap-3 rounded-3xl bg-rose-50 border border-rose-100 hover:bg-rose-100 hover:border-rose-200 px-8 py-5 font-bold text-rose-600 transition-all text-base w-full lg:w-auto">
+            <svg class="w-6 h-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
             </svg>
             Clear Data
           </button>
 
           <button type="submit"
-            class="inline-flex items-center gap-2 rounded-2xl bg-indigo-600 hover:bg-indigo-500 px-8 py-4 font-extrabold text-white transition-all shadow-lg shadow-indigo-600/30 active:scale-95 text-base">
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            class="inline-flex items-center justify-center gap-3 rounded-3xl bg-indigo-600 hover:bg-indigo-500 px-10 py-5 font-extrabold text-white transition-all shadow-lg shadow-indigo-600/30 active:scale-95 text-lg w-full lg:w-auto">
+            <svg class="w-6 h-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
               <path stroke-linecap="round" stroke-linejoin="round"
                 d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
             </svg>

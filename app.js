@@ -31,9 +31,7 @@ const modeStatus = document.getElementById('mode-status');
 const dashboardCardsContainer = document.getElementById('dashboard-cards');
 const emptyStateContainer = document.getElementById('empty-state');
 const loadingStateContainer = document.getElementById('loading-state');
-const tableCard = document.querySelector('[data-carousel-card="table"]');
-
-let isCarouselMode = localStorage.getItem('tv-display-mode') === 'carousel';
+let isCarouselMode = localStorage.getItem('tv-display-mode') !== 'scroll';
 let carouselIndex = 0;
 let carouselTimer = null;
 
@@ -48,21 +46,6 @@ function formatCurrency(value) {
 function formatPercent(value) {
   const numberValue = Number(value) || 0;
   return `${percentFormatter.format(numberValue)}%`;
-}
-
-function formatWeeklyDate(dateString) {
-  if (!dateString) return '';
-  const parts = dateString.split('-');
-  if (parts.length === 3) {
-    const year = parseInt(parts[0], 10);
-    const month = parseInt(parts[1], 10) - 1;
-    const day = parseInt(parts[2], 10);
-    const d = new Date(year, month, day);
-    if (!Number.isNaN(d.getTime())) {
-       return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-    }
-  }
-  return dateString;
 }
 
 function normalizePercent(value, target, invoiced) {
@@ -98,6 +81,19 @@ function setText(id, value) {
   }
 }
 
+function normalizeWeekTitle(title) {
+  if (typeof title !== 'string') {
+    return '';
+  }
+
+  const match = title.match(/^Target for Fiscal Week (\d+) \(FY\d+\)$/i);
+  if (match) {
+    return `Target for Week ${match[1]}`;
+  }
+
+  return title;
+}
+
 function isEmptyData(data) {
   if (!data || typeof data !== 'object') {
     return true;
@@ -112,9 +108,6 @@ function isEmptyData(data) {
     data.monthTarget,
     data.weekInvoiced,
     data.weekTarget,
-    data.mtdInvoiced,
-    data.target,
-    data.dailyTarget,
   ].every((value) => value === null || value === undefined || value === '');
 }
 
@@ -125,10 +118,6 @@ function setDashboardVisibility(hasData) {
 
   if (dashboardCardsContainer) {
     dashboardCardsContainer.classList.toggle('hidden', !hasData);
-  }
-
-  if (tableCard) {
-    tableCard.classList.toggle('hidden', !hasData);
   }
 
   if (emptyStateContainer) {
@@ -148,26 +137,13 @@ function clearDashboardValues() {
     'week-invoiced',
     'week-target',
     'week-percent',
-    'weeks-percent',
-    'mtd-percent',
-    'mtd-invoiced',
-    'mtd-target',
-    'daily-target',
-    'daily-target-value',
-    'weekly-section-title',
     'month-donut-label',
-    'week-donut-label',
   ].forEach((id) => setText(id, ''));
 
   setText('page-title', 'Dashboard');
 
   setDonut('month-donut-ring', 0);
   setDonut('week-donut-ring', 0);
-
-  const tableBody = document.getElementById('weekly-table');
-  if (tableBody) {
-    tableBody.innerHTML = '';
-  }
 }
 
 function resetCarouselProgress() {
@@ -267,11 +243,6 @@ function toggleCarouselMode() {
   }
 }
 
-function pickLatestWeek(data) {
-  const weeklyData = Array.isArray(data.weeklyData) ? data.weeklyData : [];
-  return weeklyData.find((week) => week.percent > 0) || weeklyData[weeklyData.length - 1] || null;
-}
-
 function render(data) {
   const hasData = !isEmptyData(data);
 
@@ -285,14 +256,13 @@ function render(data) {
     return;
   }
 
-  const monthPercent = normalizePercent(data.mtdPercent, data.target, data.mtdInvoiced);
+  const monthPercent = normalizePercent(data.mtdPercent, data.monthTarget, data.monthInvoiced);
   const weekPercent = normalizePercent(data.weeksPercent, data.weekTarget, data.weekInvoiced);
-  const activeWeek = pickLatestWeek(data);
 
   setText('page-title', data.dashboardTitle || 'Dashboard');
   setText('month-range', data.monthRange || '');
-  setText('week-title', data.weekTitle || (activeWeek ? `Target for ${activeWeek.week}` : 'Weekly Summary'));
-  setText('week-range', data.weekRange || (activeWeek ? `${activeWeek.start} - ${activeWeek.end}` : ''));
+  setText('week-title', normalizeWeekTitle(data.weekTitle) || 'Weekly Summary');
+  setText('week-range', data.weekRange || '');
 
   document.getElementById('month-invoiced').textContent = formatCurrency(data.monthInvoiced);
   document.getElementById('month-target').textContent = formatCurrency(data.monthTarget);
@@ -304,42 +274,7 @@ function render(data) {
   document.getElementById('week-percent').textContent = formatPercent(weekPercent);
   setDonut('week-donut-ring', weekPercent);
 
-  document.getElementById('weeks-percent').textContent = formatPercent(data.weeksPercent);
-  document.getElementById('mtd-percent').textContent = formatPercent(data.mtdPercent);
-  document.getElementById('mtd-invoiced').textContent = formatCurrency(data.mtdInvoiced);
-  document.getElementById('mtd-target').textContent = formatCurrency(data.target);
-  document.getElementById('daily-target-value').textContent = formatCurrency(data.dailyTarget);
-  document.getElementById('daily-target').textContent = `Daily target: ${formatCurrency(data.dailyTarget)}`;
-  setText('weekly-section-title', data.weeklySectionTitle || 'Weekly Breakdown');
   setText('month-donut-label', data.monthLabel || 'Month');
-  setText('week-donut-label', data.weekLabel || 'Week');
-
-  const rows = Array.isArray(data.weeklyData) ? data.weeklyData : [];
-  const tableBody = document.getElementById('weekly-table');
-
-  if (!rows.length) {
-    tableBody.innerHTML = `
-      <tr>
-        <td class="px-6 py-8 text-center font-bold text-slate-500" colspan="6">No weekly data yet.</td>
-      </tr>
-    `;
-    return;
-  }
-
-  tableBody.innerHTML = rows
-    .map(
-      (row) => `
-        <tr class="hover:bg-slate-50/50 transition-colors border-b border-slate-100">
-          <td class="py-4.5 px-6 font-bold text-slate-900">${row.week ?? ''}</td>
-          <td class="py-4.5 px-6 text-slate-600 font-medium">${formatWeeklyDate(row.start)}</td>
-          <td class="py-4.5 px-6 text-slate-600 font-medium">${formatWeeklyDate(row.end)}</td>
-          <td class="py-4.5 px-6 text-right font-bold text-slate-700">${formatCurrency(row.target)}</td>
-          <td class="py-4.5 px-6 text-right font-bold text-indigo-700">${row.invoiced === null ? '' : formatCurrency(row.invoiced)}</td>
-          <td class="py-4.5 px-6 text-right font-black text-slate-900">${formatPercent(row.percent)}</td>
-        </tr>
-      `,
-    )
-    .join('');
 }
 
 function loadData() {

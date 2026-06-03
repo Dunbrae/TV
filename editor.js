@@ -16,15 +16,6 @@ const database = getDatabase(firebaseApp);
 
 let currentData = null;
 
-const defaultWeeklyRow = {
-  week: '',
-  start: '',
-  end: '',
-  target: '',
-  invoiced: '',
-  percent: '',
-};
-
 function showToast(message, type = 'success') {
   const toast = document.getElementById('toast');
   const msgEl = document.getElementById('toast-message');
@@ -81,72 +72,25 @@ function requireData() {
 
 function readNumber(input) {
   if (!input) return null;
-  const value = input.value.trim();
+  const value = input.value.trim().replace(/,/g, '');
   return value === '' ? null : Number(value);
 }
 
-function readWeeklyRows() {
-  return Array.from(document.querySelectorAll('#weekly-editor tr')).map((row) => {
-    const fields = row.querySelectorAll('input');
-
-    return {
-      week: fields[0].value,
-      start: fields[1].value,
-      end: fields[2].value,
-      target: readNumber(fields[3]),
-      invoiced: fields[4].value.trim() === '' ? null : Number(fields[4].value),
-      percent: readNumber(fields[5]) ?? 0,
-    };
-  });
-}
-
-function renderWeeklyRows(rows) {
-  const table = document.getElementById('weekly-editor');
-
-  table.innerHTML = rows
-    .map(
-      (row, index) => `
-        <tr class="hover:bg-slate-50 transition-colors">
-          <td class="px-4 py-3"><input data-row="${index}" data-field="week" value="${row.week ?? ''}" placeholder="e.g. Week 19" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-800 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all" /></td>
-          <td class="px-4 py-3"><input data-row="${index}" data-field="start" type="date" value="${row.start ?? ''}" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-800 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all cursor-pointer" /></td>
-          <td class="px-4 py-3"><input data-row="${index}" data-field="end" type="date" value="${row.end ?? ''}" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-800 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all cursor-pointer" /></td>
-          <td class="px-4 py-3"><input data-row="${index}" data-field="target" type="number" step="0.01" value="${row.target ?? ''}" placeholder="30000" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-800 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all" /></td>
-          <td class="px-4 py-3"><input data-row="${index}" data-field="invoiced" type="number" step="0.01" value="${row.invoiced ?? ''}" placeholder="31500" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-800 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all" /></td>
-          <td class="px-4 py-3"><input data-row="${index}" data-field="percent" type="number" step="1" value="${row.percent ?? ''}" placeholder="105" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-800 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all" /></td>
-          <td class="px-4 py-3 text-center">
-            <button type="button" class="inline-flex items-center justify-center w-8.5 h-8.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 hover:text-rose-700 transition-colors border border-rose-100" data-remove-row="${index}" title="Remove row">
-              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-              </svg>
-            </button>
-          </td>
-        </tr>
-      `,
-    )
-    .join('');
-
-  document.querySelectorAll('[data-remove-row]').forEach((button) => {
-    button.addEventListener('click', () => {
-      const index = Number(button.getAttribute('data-remove-row'));
-      const nextRows = readWeeklyRows();
-      nextRows.splice(index, 1);
-      renderWeeklyRows(nextRows);
-    });
-  });
+function formatNumberValue(value) {
+  if (!value && value !== 0) return '';
+  const num = Number(value);
+  if (Number.isNaN(num)) return String(value);
+  return num.toLocaleString('en-US');
 }
 
 function updateDashboardTitleDisplay() {
   const startInput = document.querySelector('[data-path="monthStart"]');
   const sel = document.querySelector('[data-path="monthLabel"]');
-  const custom = document.querySelector('[data-path="monthLabelCustom"]');
   const dashboardDisplay = document.getElementById('dashboardTitleDisplay');
   const hiddenTitle = document.querySelector('[data-path="dashboardTitle"]');
 
   const computeMonthName = () => {
-    if (sel && sel.value === '__custom' && custom && custom.value.trim()) {
-      return custom.value.trim();
-    }
-    if (sel && sel.value && sel.value !== '__custom') {
+    if (sel && sel.value) {
       return sel.value;
     }
     const s = startInput?.value;
@@ -209,61 +153,50 @@ function populateForm(data) {
   }
 
   const monthSelect = document.querySelector('[data-path="monthLabel"]');
-  const monthCustom = document.querySelector('[data-path="monthLabelCustom"]');
   const months = Array.from(monthSelect.options).map((o) => o.value || o.text).filter(Boolean);
 
-  if (data.monthLabel && months.includes(data.monthLabel)) {
-    monthSelect.value = data.monthLabel;
-    monthCustom.value = '';
-    monthCustom.classList.add('hidden');
-  } else if (data.monthLabel) {
-    monthSelect.value = '__custom';
-    monthCustom.value = data.monthLabel;
-    monthCustom.classList.remove('hidden');
-  } else {
-    monthSelect.value = '';
-    monthCustom.value = '';
-    monthCustom.classList.add('hidden');
-  }
+  monthSelect.value = data.monthLabel && months.includes(data.monthLabel) ? data.monthLabel : '';
 
-  document.querySelector('[data-path="weekTitle"]').value = data.weekTitle ?? '';
-  
-  const weekPicker = document.querySelector('[data-path="weekPicker"]');
-  if (weekPicker) {
-    const inferWeek = (text) => {
-      if (!text) return '';
-      const parts = String(text).split(' - ').map((p) => p.trim());
-      const d = new Date(parts[0]);
-      if (Number.isNaN(d.getTime())) return '';
-      const tmp = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-      const dayNum = tmp.getUTCDay() || 7;
-      tmp.setUTCDate(tmp.getUTCDate() + 4 - dayNum);
-      const year = tmp.getUTCFullYear();
-      const yearStart = new Date(Date.UTC(year, 0, 1));
-      const weekNo = Math.ceil((((tmp - yearStart) / 86400000) + 1) / 7);
-      return `${year}-W${String(weekNo).padStart(2, '0')}`;
-    };
+  const wsEl = document.querySelector('[data-path="weekStart"]');
+  const weEl = document.querySelector('[data-path="weekEnd"]');
 
-    weekPicker.value = data.weekPicker || inferWeek(data.weekRange) || '';    
-    const display = document.querySelector('[data-path="weekRangeDisplay"]');
-    if (display) {
-      display.value = computeWeekRangeFromPicker(weekPicker.value) || '';
+  if (data.weekStart && data.weekEnd) {
+    wsEl.value = data.weekStart;
+    weEl.value = data.weekEnd;
+  } else if (data.weekPicker && data.weekPicker.includes('-W')) {
+    const [yearStr, weekStr] = data.weekPicker.split('-W');
+    const year = Number(yearStr);
+    const week = Number(weekStr);
+    if (year && week) {
+      const jan4 = new Date(Date.UTC(year, 0, 4));
+      const dayOfWeek = jan4.getUTCDay() || 7;
+      const monday = new Date(Date.UTC(year, 0, 4 - (dayOfWeek - 1) + (week - 1) * 7));
+      wsEl.value = monday.toISOString().slice(0, 10);
+      weEl.value = new Date(monday.getTime() + 6 * 86400000).toISOString().slice(0, 10);
+    }
+  } else if (data.weekRange) {
+    const parts = String(data.weekRange).split(' - ').map((p) => p.trim());
+    const d = new Date(parts[0]);
+    if (!Number.isNaN(d.getTime())) {
+      wsEl.value = d.toISOString().slice(0, 10);
+    }
+    if (parts[1]) {
+      const d2 = new Date(parts[1]);
+      if (!Number.isNaN(d2.getTime())) {
+        weEl.value = d2.toISOString().slice(0, 10);
+      }
     }
   }
 
-  document.querySelector('[data-path="weekLabel"]').value = data.weekLabel ?? '';
-  document.querySelector('[data-path="weeklySectionTitle"]').value = data.weeklySectionTitle ?? '';
-  document.querySelector('[data-path="monthInvoiced"]').value = data.monthInvoiced ?? '';
-  document.querySelector('[data-path="monthTarget"]').value = data.monthTarget ?? '';
-  document.querySelector('[data-path="weekInvoiced"]').value = data.weekInvoiced ?? '';
-  document.querySelector('[data-path="weekTarget"]').value = data.weekTarget ?? '';
+  updateFiscalDisplay();
+
+  document.querySelector('[data-path="monthInvoiced"]').value = formatNumberValue(data.monthInvoiced);
+  document.querySelector('[data-path="monthTarget"]').value = formatNumberValue(data.monthTarget);
+  document.querySelector('[data-path="weekInvoiced"]').value = formatNumberValue(data.weekInvoiced);
+  document.querySelector('[data-path="weekTarget"]').value = formatNumberValue(data.weekTarget);
   document.querySelector('[data-path="weeksPercent"]').value = data.weeksPercent ?? '';
   document.querySelector('[data-path="mtdPercent"]').value = data.mtdPercent ?? '';
-  document.querySelector('[data-path="mtdInvoiced"]').value = data.mtdInvoiced ?? '';
-  document.querySelector('[data-path="target"]').value = data.target ?? '';
-  document.querySelector('[data-path="dailyTarget"]').value = data.dailyTarget ?? '';
   
-  renderWeeklyRows(Array.isArray(data.weeklyData) ? data.weeklyData : []);
   updateDashboardTitleDisplay();
 }
 
@@ -286,73 +219,96 @@ function collectPayload() {
       if (startText && endText) return `${startText} - ${endText}`;
       return startText || endText || '';
     })(),
-    monthLabel: (function(){
-      const sel = document.querySelector('[data-path="monthLabel"]');
-      const custom = document.querySelector('[data-path="monthLabelCustom"]');
-      if (sel.value === '__custom') return custom.value.trim();
-      return sel.value.trim();
-    })(),
+    monthLabel: document.querySelector('[data-path="monthLabel"]')?.value.trim(),
+    weekStart: document.querySelector('[data-path="weekStart"]')?.value || '',
+    weekEnd: document.querySelector('[data-path="weekEnd"]')?.value || '',
     weekTitle: (function(){
-      const picker = document.querySelector('[data-path="weekPicker"]')?.value || '';
-      if (!picker) return document.querySelector('[data-path="weekTitle"]')?.value.trim();
-      const weekNum = picker.split('-W')[1];
-      return `Target for Week ${weekNum}`;
+      const ws = document.querySelector('[data-path="weekStart"]')?.value;
+      const we = document.querySelector('[data-path="weekEnd"]')?.value;
+      if (!ws || !we) return '';
+      const d = new Date(ws);
+      if (Number.isNaN(d.getTime())) return '';
+      const dayNum = d.getUTCDay() || 7;
+      const monday = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() - (dayNum - 1)));
+      const month = monday.getUTCMonth();
+      const calYear = monday.getUTCFullYear();
+      const fiscalYearEnd = month >= 6 ? calYear + 1 : calYear;
+      const fiscalYearStart = fiscalYearEnd - 1;
+      const july1 = new Date(Date.UTC(fiscalYearStart, 6, 1));
+      const july1Day = july1.getUTCDay() || 7;
+      const fyStart = new Date(Date.UTC(fiscalYearStart, 6, 1 - (july1Day - 1)));
+      const diffMs = monday.getTime() - fyStart.getTime();
+      const fw = Math.floor(diffMs / (7 * 86400000)) + 1;
+      return `Target for Week ${fw}`;
     })(),
     weekRange: (function(){
-      const w = document.querySelector('[data-path="weekPicker"]')?.value || '';
-      if (!w) return '';
-      const [yearStr, weekStr] = w.split('-W');
-      const year = Number(yearStr);
-      const week = Number(weekStr);
-      if (!year || !week) return '';
-      function getDateOfISOWeek(wk, yr) {
-        const jan4 = new Date(Date.UTC(yr, 0, 4));
-        const dayOfWeek = jan4.getUTCDay() || 7;
-        return new Date(Date.UTC(yr, 0, 4 - (dayOfWeek - 1) + (wk - 1) * 7));
-      }
-      const start = getDateOfISOWeek(week, year);
-      const end = new Date(Date.UTC(start.getUTCFullYear(), start.getUTCMonth(), start.getUTCDate() + 6));
-      const format = (d) => {
+      const ws = document.querySelector('[data-path="weekStart"]')?.value;
+      const we = document.querySelector('[data-path="weekEnd"]')?.value;
+      if (!ws || !we) return '';
+      const fmt = (iso) => {
+        const d = new Date(iso);
+        if (Number.isNaN(d.getTime())) return '';
         const utcDate = new Date(d.getTime() + d.getTimezoneOffset() * 60000);
         return utcDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
       };
-      return `${format(start)} - ${format(end)}`;
+      const startText = fmt(ws);
+      const endText = fmt(we);
+      if (startText && endText) return `${startText} - ${endText}`;
+      return startText || endText || '';
     })(),
-    weekLabel: document.querySelector('[data-path="weekLabel"]')?.value.trim(),
-    weeklySectionTitle: document.querySelector('[data-path="weeklySectionTitle"]').value.trim(),
     monthInvoiced: readNumber(document.querySelector('[data-path="monthInvoiced"]')),
     monthTarget: readNumber(document.querySelector('[data-path="monthTarget"]')),
     weekInvoiced: readNumber(document.querySelector('[data-path="weekInvoiced"]')),
     weekTarget: readNumber(document.querySelector('[data-path="weekTarget"]')),
     weeksPercent: readNumber(document.querySelector('[data-path="weeksPercent"]')),
     mtdPercent: readNumber(document.querySelector('[data-path="mtdPercent"]')),
-    mtdInvoiced: readNumber(document.querySelector('[data-path="mtdInvoiced"]')),
-    target: readNumber(document.querySelector('[data-path="target"]')),
-    dailyTarget: readNumber(document.querySelector('[data-path="dailyTarget"]')),
-    weeklyData: readWeeklyRows(),
   };
 
   return payload;
 }
 
-function computeWeekRangeFromPicker(pickerValue) {
-  if (!pickerValue) return '';
-  const [yearStr, weekStr] = pickerValue.split('-W');
-  const year = Number(yearStr);
-  const week = Number(weekStr);
-  if (!year || !week) return '';
-  function getDateOfISOWeek(wk, yr) {
-    const jan4 = new Date(Date.UTC(yr, 0, 4));
-    const dayOfWeek = jan4.getUTCDay() || 7;
-    return new Date(Date.UTC(yr, 0, 4 - (dayOfWeek - 1) + (wk - 1) * 7));
+function syncWeekRange() {
+  const wsEl = document.querySelector('[data-path="weekStart"]');
+  const weEl = document.querySelector('[data-path="weekEnd"]');
+  if (!wsEl || !weEl) return;
+  if (wsEl.value && !weEl.value) {
+    const d = new Date(wsEl.value);
+    if (!Number.isNaN(d.getTime())) {
+      weEl.value = new Date(d.getTime() + 6 * 86400000).toISOString().slice(0, 10);
+    }
+  } else if (weEl.value && !wsEl.value) {
+    const d = new Date(weEl.value);
+    if (!Number.isNaN(d.getTime())) {
+      wsEl.value = new Date(d.getTime() - 6 * 86400000).toISOString().slice(0, 10);
+    }
   }
-  const start = getDateOfISOWeek(week, year);
-  const end = new Date(Date.UTC(start.getUTCFullYear(), start.getUTCMonth(), start.getUTCDate() + 6));
-  const format = (d) => {
-    const utcDate = new Date(d.getTime() + d.getTimezoneOffset() * 60000);
-    return utcDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-  };
-  return `${format(start)} - ${format(end)}`;
+}
+
+function getFiscalWeek(dateStr) {
+  if (!dateStr) return null;
+  const d = new Date(dateStr);
+  if (Number.isNaN(d.getTime())) return null;
+
+  const dayNum = d.getUTCDay() || 7;
+  const monday = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() - (dayNum - 1)));
+  const month = monday.getUTCMonth();
+  const calYear = monday.getUTCFullYear();
+  const fiscalYearEnd = month >= 6 ? calYear + 1 : calYear;
+  const fiscalYearStart = fiscalYearEnd - 1;
+  const msPerWeek = 7 * 24 * 60 * 60 * 1000;
+  const july1 = new Date(Date.UTC(fiscalYearStart, 6, 1));
+  const july1Day = july1.getUTCDay() || 7;
+  const fyStart = new Date(Date.UTC(fiscalYearStart, 6, 1 - (july1Day - 1)));
+  const diffMs = monday.getTime() - fyStart.getTime();
+  return Math.floor(diffMs / msPerWeek) + 1;
+}
+
+function updateFiscalDisplay() {
+  const wsEl = document.querySelector('[data-path="weekStart"]');
+  const display = document.getElementById('fiscal-week-number');
+  if (!wsEl || !display) return;
+  const fw = getFiscalWeek(wsEl.value);
+  display.textContent = fw ? `Week ${fw}` : 'Week --';
 }
 
 async function loadDashboard() {
@@ -397,15 +353,8 @@ async function clearAllData() {
   }
 }
 
-function addRow() {
-  const rows = readWeeklyRows();
-  rows.push({ ...defaultWeeklyRow });
-  renderWeeklyRows(rows);
-}
-
 async function bootstrap() {
   document.getElementById('editor-form').addEventListener('submit', saveChanges);
-  document.getElementById('add-week-button').addEventListener('click', addRow);
   
   const clearButton = document.getElementById('clear-data-button');
   if (clearButton) {
@@ -413,35 +362,59 @@ async function bootstrap() {
   }
 
   const monthSelect = document.querySelector('[data-path="monthLabel"]');
-  const monthCustom = document.querySelector('[data-path="monthLabelCustom"]');
-  if (monthSelect && monthCustom) {
-    monthSelect.addEventListener('change', () => {
-      if (monthSelect.value === '__custom') {
-        monthCustom.classList.remove('hidden');
-        monthCustom.focus();
-      } else {
-        monthCustom.classList.add('hidden');
-        monthCustom.value = '';
-      }
-      updateDashboardTitleDisplay();
-    });
+  if (monthSelect) {
+    monthSelect.addEventListener('change', updateDashboardTitleDisplay);
   }
 
   const monthStartInput = document.querySelector('[data-path="monthStart"]');
   if (monthStartInput) {
     monthStartInput.addEventListener('change', updateDashboardTitleDisplay);
   }
-  if (monthCustom) {
-    monthCustom.addEventListener('input', updateDashboardTitleDisplay);
+
+  const numberInputs = ['monthInvoiced', 'monthTarget', 'weekInvoiced', 'weekTarget'];
+  numberInputs.forEach((path) => {
+    const el = document.querySelector(`[data-path="${path}"]`);
+    if (el) {
+      el.addEventListener('input', () => {
+        const cursor = el.selectionStart;
+        const raw = el.value.replace(/,/g, '');
+        const lenBefore = el.value.length;
+        el.value = formatNumberValue(raw);
+        const lenAfter = el.value.length;
+        const offset = cursor + (lenAfter - lenBefore);
+        el.setSelectionRange(offset, offset);
+      });
+      el.addEventListener('input', autoCalcPercent);
+    }
+  });
+
+  function autoCalcPercent() {
+    const calc = (invoicedPath, targetPath, percentPath) => {
+      const inv = document.querySelector(`[data-path="${invoicedPath}"]`);
+      const tgt = document.querySelector(`[data-path="${targetPath}"]`);
+      const pct = document.querySelector(`[data-path="${percentPath}"]`);
+      if (!inv || !tgt || !pct) return;
+      const invoiced = Number(inv.value.replace(/,/g, ''));
+      const target = Number(tgt.value.replace(/,/g, ''));
+      if (target > 0) {
+        const val = Math.round((invoiced / target) * 100);
+        pct.value = String(val);
+      }
+    };
+    calc('monthInvoiced', 'monthTarget', 'mtdPercent');
+    calc('weekInvoiced', 'weekTarget', 'weeksPercent');
   }
 
-  const weekPicker = document.querySelector('[data-path="weekPicker"]');
-  const weekDisplay = document.querySelector('[data-path="weekRangeDisplay"]');
-  if (weekPicker && weekDisplay) {
-    weekPicker.addEventListener('change', () => {
-      weekDisplay.value = computeWeekRangeFromPicker(weekPicker.value) || '';
-    });
-  }
+  const wsEl = document.querySelector('[data-path="weekStart"]');
+  const weEl = document.querySelector('[data-path="weekEnd"]');
+  [wsEl, weEl].forEach((el) => {
+    if (el) {
+      el.addEventListener('change', () => {
+        syncWeekRange();
+        updateFiscalDisplay();
+      });
+    }
+  });
 
   document.addEventListener('keydown', (e) => {
     const isSave = (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's';
