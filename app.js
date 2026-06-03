@@ -262,14 +262,8 @@ function render(data) {
 
   setText('page-title', data.dashboardTitle || 'Dashboard');
   setText('month-range', data.monthRange || '');
-  // Compute 'As of' date for month badge: prefer end of monthRange if present
-  let asOfString = '';
-  if (data.monthRange && typeof data.monthRange === 'string' && data.monthRange.includes('-')) {
-    const parts = data.monthRange.split('-');
-    asOfString = parts[1] ? parts[1].trim() : parts[0].trim();
-  }
-  const asOfDate = asOfString ? new Date(asOfString) : new Date();
-  const formattedAsOf = formatHumanDate(asOfDate);
+  // Use today's date for the 'As of' badge
+  const formattedAsOf = formatHumanDate(new Date());
   setText('month-as-of', formattedAsOf);
   setText('week-title', normalizeWeekTitle(data.weekTitle) || 'Weekly Summary');
   setText('week-range', data.weekRange || '');
