@@ -262,8 +262,10 @@ function render(data) {
 
   setText('page-title', data.dashboardTitle || 'Dashboard');
   setText('month-range', data.monthRange || '');
-  // Use today's date for the 'As of' badge
-  const formattedAsOf = formatHumanDate(new Date());
+  // Use yesterday's date for the 'As of' badge
+  const d = new Date();
+  d.setDate(d.getDate() - 1);
+  const formattedAsOf = formatHumanDate(d);
   setText('month-as-of', formattedAsOf);
   setText('week-title', normalizeWeekTitle(data.weekTitle) || 'Weekly Summary');
   setText('week-range', data.weekRange || '');
